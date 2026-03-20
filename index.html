@@ -94,7 +94,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .abar{display:flex;align-items:center;gap:12px;padding:18px 0;border-top:1px solid var(--border);margin-top:20px}
 
 /* SUMMARY */
-.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:22px}
 .scard{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px 18px}
 .scard.hi{border-color:var(--hi-b);background:var(--hi)}
 .scard.al{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.08)}
@@ -121,6 +121,47 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .wl-win{background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
 .wl-loss{background:rgba(239,68,68,.13);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
 .wl-tie{background:var(--border);color:var(--muted)}
+
+/* LOCATION OVERVIEW CARDS */
+.loc-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.loc-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.loc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border2)}
+.loc-card.rank-1::before{background:linear-gradient(90deg,#ffd700,#ffa500)}
+.loc-card.rank-2::before{background:linear-gradient(90deg,#c0c0c0,#a0a0a0)}
+.loc-card.rank-3::before{background:linear-gradient(90deg,#cd7f32,#a0522d)}
+.loc-card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.loc-card-name{font-weight:600;font-size:15px;color:var(--text);line-height:1.3;flex:1}
+.loc-card-rank{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:4px;background:var(--border);color:var(--muted);white-space:nowrap;flex-shrink:0}
+.loc-card-rank.rk1{background:rgba(255,215,0,.12);color:#ffd700;border:1px solid rgba(255,215,0,.3)}
+.loc-card-rank.rk2{background:rgba(192,192,192,.12);color:#c0c0c0;border:1px solid rgba(192,192,192,.3)}
+.loc-card-rank.rk3{background:rgba(205,127,50,.12);color:#cd7f32;border:1px solid rgba(205,127,50,.3)}
+.loc-card-stat{display:flex;align-items:baseline;gap:8px}
+.loc-stat-big{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--accent);line-height:1}
+.loc-stat-sub{font-size:12px;color:var(--muted)}
+.loc-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.loc-meta-item{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:8px 10px}
+.loc-meta-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:3px}
+.loc-meta-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+.band-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px;margin-top:4px}
+.band-seg{height:100%;min-width:2px;transition:width .3s}
+.band-b0{background:#00d4aa}
+.band-b25{background:#00a8cc}
+.band-b50{background:#f59e0b}
+.band-b75{background:#ef4444}
+.band-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px}
+.band-li{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.band-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* BAND BREAKDOWN TABLE */
+.btable{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12px}
+.btable th{background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:9px 14px;border-bottom:1px solid var(--border);text-align:center}
+.btable th.lbl-th{text-align:left}
+.btable td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+.btable td.lbl-td{text-align:left;font-weight:600;color:var(--text)}
+.btable tr:last-child td{border-bottom:none}
+.btable tr:hover td{background:var(--surface2)}
+.band-inline{display:flex;align-items:center;gap:6px}
+.band-pct{font-size:10px;color:var(--muted)}
 
 /* MATRIX */
 .mwrap{overflow:auto;border:1px solid var(--border);border-radius:6px;max-height:580px}
@@ -333,6 +374,11 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
       <div id="top3"></div>
     </div>
 
+    <div class="panel" id="loc-overview-panel">
+      <div class="ptitle">// New Location Snapshot</div>
+      <div class="loc-card-grid" id="loc-overview"></div>
+    </div>
+
     <div class="panel">
       <div class="ptitle">// Commute Distance Matrix <span style="font-weight:300;color:var(--muted);font-size:10px;margin-left:8px">(straight-line miles, one-way)</span></div>
       <div class="toolbar">
@@ -354,6 +400,12 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
       <div class="ptitle">// Capacity Allocation by New Location</div>
       <p class="tmuted mt1" style="margin-bottom:14px">Each employee assigned to the new location with their lowest mileage. Sorted by employee count.</p>
       <div id="capsec"></div>
+    </div>
+
+    <div class="panel" id="band-panel">
+      <div class="ptitle">// Commute Distance Distribution</div>
+      <p class="tmuted mt1" style="margin-bottom:14px">Straight-line mileage bands from each employee's home to each new office location.</p>
+      <div id="band-sec"></div>
     </div>
 
     <div class="abar">
@@ -883,31 +935,42 @@ function buildResults(rd) {
   var w50 = rows.filter(function(r){ return r.distances.some(function(d){ return d !== null && d < 50; }); }).length;
   var pct50 = total > 0 ? ((w50/total)*100).toFixed(1) : 0;
 
-  var improveCard = '';
+  var cards = '<div class="scard"><div class="slb">Total Employees</div><div class="sval">'+total+'</div><div class="ssub2">Unique records analyzed</div></div>';
+
   if (hasCD) {
     var improveCount = rows.filter(function(r){
-      var cur = r.distances[0];
-      if (cur === null) return false;
-      return newCols.some(function(_, ni){
-        var nd = r.distances[newOff+ni];
-        return nd !== null && nd < cur;
-      });
+      var cur = r.distances[0]; if (cur === null) return false;
+      return newCols.some(function(_, ni){ var nd = r.distances[newOff+ni]; return nd !== null && nd < cur; });
+    }).length;
+    var worsenCount = rows.filter(function(r){
+      var cur = r.distances[0]; if (cur === null) return false;
+      var hasAny = newCols.some(function(_, ni){ return r.distances[newOff+ni] !== null; });
+      if (!hasAny) return false;
+      return newCols.every(function(_, ni){ var nd = r.distances[newOff+ni]; return nd === null || nd > cur; });
     }).length;
     var impPct = total > 0 ? ((improveCount/total)*100).toFixed(1) : 0;
-    improveCard = '<div class="scard hi"><div class="slb">Commute Improves</div><div class="sval ac">'+improveCount+'</div><div class="ssub2">'+impPct+'% would commute less at ≥1 new location</div></div>';
+    var woPct  = total > 0 ? ((worsenCount/total)*100).toFixed(1) : 0;
+    cards += '<div class="scard hi"><div class="slb">Commute Improves</div><div class="sval ac">'+improveCount+'</div><div class="ssub2">'+impPct+'% have a shorter commute at ≥1 new location</div></div>';
+    cards += '<div class="scard" style="border-color:rgba(239,68,68,.3)"><div class="slb">Commute Worsens</div><div class="sval" style="color:var(--danger)">'+worsenCount+'</div><div class="ssub2">'+woPct+'% see a longer commute at every new location</div></div>';
+    cards += '<div class="scard"><div class="slb">Within 50 Miles</div><div class="sval">'+w50+'</div><div class="ssub2">'+pct50+'% within range of ≥1 new location</div></div>';
+  } else {
+    cards += '<div class="scard hi"><div class="slb">Within 50 Miles</div><div class="sval ac">'+w50+'</div><div class="ssub2">'+pct50+'% have ≥1 location within a reasonable commute</div></div>';
   }
 
-  var failCard = failedEmps > 0
-    ? '<div class="scard al"><div class="slb">⚠ Unresolved Addresses</div><div class="sval dg">'+failedEmps+'</div><div class="ssub2">Could not be geocoded — shown as "—". Upload a ZIP reference file to improve coverage.</div></div>'
-    : '';
+  if (failedEmps > 0) {
+    cards += '<div class="scard al"><div class="slb">⚠ Unresolved</div><div class="sval dg">'+failedEmps+'</div><div class="ssub2">Addresses that could not be geocoded — shown as "—"</div></div>';
+  }
 
-  document.getElementById('sgrid').innerHTML =
-    '<div class="scard"><div class="slb">Total Employees</div><div class="sval">'+total+'</div><div class="ssub2">Unique records analyzed</div></div>' +
-    (hasCD ? improveCard : '<div class="scard hi"><div class="slb">Within 50 Miles</div><div class="sval ac">'+w50+'</div><div class="ssub2">'+pct50+'% have ≥1 location within reasonable commute</div></div>') +
-    (failCard || (!hasCD ? '' : '<div class="scard"><div class="slb">Within 50 Miles</div><div class="sval">'+w50+'</div><div class="ssub2">'+pct50+'% have ≥1 location within 50 mi</div></div>'));
+  document.getElementById('sgrid').innerHTML = cards;
 
   // TOP 3
   buildTop3(rows, newCols, newOff, total, hasCD);
+
+  // LOCATION OVERVIEW CARDS
+  buildLocOverview(rows, newCols, newOff, total, hasCD);
+
+  // BAND TABLE
+  buildBandTable(rows, newCols, newOff, total);
 
   // MATRIX
   var tbl = '<table class="mtable"><thead><tr><th class="idc">Employee ID</th>';
@@ -1012,6 +1075,134 @@ function buildTop3(rows, newCols, newOff, total, hasCD) {
   });
   html += '</div></div>';
   document.getElementById('top3').innerHTML = html;
+}
+
+function buildLocOverview(rows, newCols, newOff, total, hasCD) {
+  var el = document.getElementById('loc-overview');
+  var pan = document.getElementById('loc-overview-panel');
+  if (!newCols.length) { pan.style.display='none'; return; }
+  pan.style.display = '';
+
+  var stats = newCols.map(function(col, ni) {
+    var ci = newOff + ni;
+    var b0=0, b25=0, b50=0, b75=0, wins=0, losses=0, ties=0, distSum=0, distCnt=0;
+    rows.forEach(function(row) {
+      var nd = row.distances[ci]; if (nd === null) return;
+      distSum += nd; distCnt++;
+      if (nd <= 25) b0++; else if (nd <= 50) b25++; else if (nd <= 75) b50++; else b75++;
+      if (hasCD && row.distances[0] !== null) {
+        var diff = row.distances[0] - nd;
+        if (diff > 0.1) wins++; else if (diff < -0.1) losses++; else ties++;
+      }
+    });
+    return { label: col.label, u50: b0+b25, b0:b0, b25:b25, b50:b50, b75:b75,
+      wins:wins, losses:losses, ties:ties,
+      avgDist: distCnt>0?(distSum/distCnt).toFixed(1):'—' };
+  });
+
+  var ranked = stats.slice().sort(function(a,b){ return b.u50-a.u50; });
+  var rankIdx = {};
+  ranked.forEach(function(s,i){ rankIdx[s.label]=i+1; });
+
+  var html = '';
+  stats.forEach(function(s) {
+    var rk = rankIdx[s.label];
+    var rkCls = rk<=3?'rk'+rk:'';
+    var rkLbl = rk<=3?['🥇 #1','🥈 #2','🥉 #3'][rk-1]:'#'+rk;
+    var cardCls = rk<=3?'loc-card rank-'+rk:'loc-card';
+    var u50Pct = total>0?((s.u50/total)*100).toFixed(1):0;
+    var tot = s.b0+s.b25+s.b50+s.b75||1;
+    var seg = function(n,cls){ return n>0?'<div class="band-seg '+cls+'" style="width:'+((n/tot)*100).toFixed(1)+'%"></div>':''; };
+
+    var wlHtml = '';
+    if (hasCD) {
+      wlHtml = '<div class="wl-row">';
+      if (s.wins>0)   wlHtml += '<span class="wl-pill wl-win">↓ '+s.wins+' shorter</span>';
+      if (s.losses>0) wlHtml += '<span class="wl-pill wl-loss">↑ '+s.losses+' longer</span>';
+      if (s.ties>0)   wlHtml += '<span class="wl-pill wl-tie">≈ '+s.ties+' same</span>';
+      wlHtml += '</div>';
+    }
+
+    html +=
+      '<div class="'+cardCls+'">'+
+        '<div class="loc-card-hdr">'+
+          '<div class="loc-card-name">'+s.label+'</div>'+
+          '<div class="loc-card-rank '+rkCls+'">'+rkLbl+'</div>'+
+        '</div>'+
+        '<div class="loc-card-stat">'+
+          '<div class="loc-stat-big">'+s.u50+'</div>'+
+          '<div class="loc-stat-sub">of '+total+' employees<br>within 50 miles&nbsp;<strong style="color:var(--accent)">'+u50Pct+'%</strong></div>'+
+        '</div>'+
+        wlHtml+
+        '<div class="loc-card-meta">'+
+          '<div class="loc-meta-item"><div class="loc-meta-lbl">Avg Commute</div><div class="loc-meta-val">'+s.avgDist+' mi</div></div>'+
+          '<div class="loc-meta-item"><div class="loc-meta-lbl">0–25 mi</div><div class="loc-meta-val" style="color:var(--accent)">'+s.b0+'</div></div>'+
+          '<div class="loc-meta-item"><div class="loc-meta-lbl">25–50 mi</div><div class="loc-meta-val" style="color:#00a8cc">'+s.b25+'</div></div>'+
+          '<div class="loc-meta-item"><div class="loc-meta-lbl">50+ mi</div><div class="loc-meta-val" style="color:var(--muted)">'+((s.b50||0)+(s.b75||0))+'</div></div>'+
+        '</div>'+
+        '<div>'+
+          '<div class="band-bar">'+seg(s.b0,'band-b0')+seg(s.b25,'band-b25')+seg(s.b50,'band-b50')+seg(s.b75,'band-b75')+'</div>'+
+          '<div class="band-legend">'+
+            '<span class="band-li"><span class="band-dot" style="background:#00d4aa"></span>0–25 mi</span>'+
+            '<span class="band-li"><span class="band-dot" style="background:#00a8cc"></span>25–50 mi</span>'+
+            '<span class="band-li"><span class="band-dot" style="background:#f59e0b"></span>50–75 mi</span>'+
+            '<span class="band-li"><span class="band-dot" style="background:#ef4444"></span>75+ mi</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function buildBandTable(rows, newCols, newOff, total) {
+  var el = document.getElementById('band-sec');
+  var pan = document.getElementById('band-panel');
+  if (!newCols.length) { pan.style.display='none'; return; }
+  pan.style.display = '';
+
+  var stats = newCols.map(function(col, ni) {
+    var ci = newOff + ni;
+    var b0=0, b25=0, b50=0, b75=0;
+    rows.forEach(function(row) {
+      var nd = row.distances[ci]; if (nd===null) return;
+      if (nd<=25) b0++; else if (nd<=50) b25++; else if (nd<=75) b50++; else b75++;
+    });
+    return { label: col.label, b0:b0, b25:b25, b50:b50, b75:b75, tot:b0+b25+b50+b75 };
+  });
+
+  function pct(n, t) { return t>0?((n/t)*100).toFixed(1)+'%':'0%'; }
+  function barCell(n, t, color) {
+    var p = t>0?Math.round((n/t)*100):0;
+    return '<td>'+
+      '<div class="band-inline">'+
+        '<span style="font-family:var(--mono);font-weight:600;color:'+color+';min-width:28px;display:inline-block">'+n+'</span>'+
+        '<div style="flex:1;background:var(--border);height:6px;border-radius:3px;overflow:hidden;min-width:60px">'+
+          '<div style="height:100%;background:'+color+';width:'+p+'%"></div>'+
+        '</div>'+
+        '<span class="band-pct">'+pct(n,t)+'</span>'+
+      '</div>'+
+    '</td>';
+  }
+
+  var html = '<table class="btable"><thead><tr>'+
+    '<th class="lbl-th">Location</th>'+
+    '<th><span class="band-dot" style="background:#00d4aa;display:inline-block;vertical-align:middle;margin-right:4px"></span>0–25 mi</th>'+
+    '<th><span class="band-dot" style="background:#00a8cc;display:inline-block;vertical-align:middle;margin-right:4px"></span>25–50 mi</th>'+
+    '<th><span class="band-dot" style="background:#f59e0b;display:inline-block;vertical-align:middle;margin-right:4px"></span>50–75 mi</th>'+
+    '<th><span class="band-dot" style="background:#ef4444;display:inline-block;vertical-align:middle;margin-right:4px"></span>75+ mi</th>'+
+    '</tr></thead><tbody>';
+
+  stats.forEach(function(s) {
+    html += '<tr>'+
+      '<td class="lbl-td">'+s.label+'</td>'+
+      barCell(s.b0, s.tot, '#00d4aa')+
+      barCell(s.b25, s.tot, '#00a8cc')+
+      barCell(s.b50, s.tot, '#f59e0b')+
+      barCell(s.b75, s.tot, '#ef4444')+
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
 }
 
 function buildCapacity(rows, newCols, newOff, total, dests) {
