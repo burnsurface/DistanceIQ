@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DistanceIQ — Workplace Commute Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#0d0f12; --surface:#151820; --surface2:#1c2029;
+  --border:#2a2f3d; --border2:#353c50;
+  --text:#e8eaf0; --muted:#6b7280;
+  --accent:#00d4aa; --accent2:#0099ff;
+  --warn:#f59e0b; --danger:#ef4444;
+  --hi:rgba(0,212,170,.12); --hi-b:rgba(0,212,170,.4);
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.6}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;height:60px;background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--accent)}
+.logo span{color:var(--muted);font-weight:400}
+.hdr-sub{margin-left:20px;padding-left:20px;border-left:1px solid var(--border);font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px}
+
+/* LAYOUT */
+.wrap{max-width:1400px;margin:0 auto;padding:40px}
+
+/* STEPS */
+.steps-nav{display:flex;margin-bottom:40px;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.step-tab{flex:1;display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--surface);border-right:1px solid var(--border);cursor:pointer;transition:background .2s;position:relative}
+.step-tab:last-child{border-right:none}
+.step-tab.active{background:var(--surface2)}
+.step-tab.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent)}
+.step-tab.done .snum{background:var(--accent);color:var(--bg)}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;flex-shrink:0}
+.slabel{font-size:13px;font-weight:500}
+.ssub{font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;margin-bottom:24px}
+.ptitle{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.section{display:none}
+.section.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:5px;font-family:var(--mono);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid transparent;background:none;text-decoration:none}
+.btn-p{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-p:hover{background:#00e8bb}
+.btn-s{color:var(--text);border-color:var(--border2)}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+.btn-g{color:var(--accent2);border-color:rgba(0,153,255,.3)}
+.btn-g:hover{background:rgba(0,153,255,.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* TEMPLATE BOXES */
+.tbox{border:1px dashed var(--border2);border-radius:6px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--surface2);margin-bottom:14px}
+.tdesc{font-size:14px;color:var(--muted);max-width:520px}
+.tdesc strong{color:var(--text);display:block;margin-bottom:5px;font-size:15px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pill{font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--border);border-radius:3px;color:var(--muted)}
+
+/* UPLOAD ZONES */
+.uzone{border:2px dashed var(--border2);border-radius:8px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);position:relative}
+.uzone:hover,.uzone.drag{border-color:var(--accent);background:rgba(0,212,170,.04)}
+.uzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uzone-sm{padding:22px}
+.uico{font-size:30px;margin-bottom:8px}
+.ulbl{font-size:15px;font-weight:500;margin-bottom:4px}
+.usub{font-size:12px;color:var(--muted);font-family:var(--mono)}
+
+/* FILE LOADED */
+.floaded{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(0,212,170,.07);border:1px solid var(--hi-b);border-radius:6px;margin-top:12px}
+.floaded-name{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.floaded-sub{font-size:12px;color:var(--muted)}
+
+/* PREVIEW TABLE */
+.ptable-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:6px}
+.ptable{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ptable th{background:var(--surface2);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding:9px 13px;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left}
+.ptable td{padding:7px 13px;border-bottom:1px solid var(--border);color:var(--text)}
+.ptable tr:last-child td{border-bottom:none}
+.ptable tr:hover td{background:var(--surface2)}
+.pcnt{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:7px}
+
+/* DEST MODE TOGGLE */
+.mode-tog{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.mbtn{flex:1;padding:11px 18px;background:var(--surface2);border:none;color:var(--muted);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
+.mbtn:last-child{border-right:none}
+.mbtn.active{background:var(--accent);color:var(--bg);font-weight:600}
+
+/* MANUAL DEST FORM */
+.dlist{display:flex;flex-direction:column;gap:12px}
+.ditem{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px 18px}
+.ditem-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ditem-num{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
+.ditem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:3px;transition:color .15s}
+.ditem-rm:hover{color:var(--danger)}
+.frow{display:grid;grid-template-columns:160px 2fr 1.5fr 60px 100px;gap:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.flbl{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.finp{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 11px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s}
+.finp:focus{border-color:var(--accent)}
+.finp::placeholder{color:var(--muted)}
+.add-dbtn{margin-top:10px;width:100%;padding:11px;background:transparent;border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all .2s}
+.add-dbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.04)}
+
+/* ACTION BAR */
+.abar{display:flex;align-items:center;gap:12px;padding:18px 0;border-top:1px solid var(--border);margin-top:20px}
+
+/* SUMMARY */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.scard{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px 18px}
+.scard.hi{border-color:var(--hi-b);background:var(--hi)}
+.scard.al{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.08)}
+.slb{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.sval{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--text);line-height:1}
+.sval.ac{color:var(--accent)}
+.sval.dg{color:var(--danger)}
+.ssub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* TOP 3 */
+.t3panel{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:22px;margin-bottom:6px}
+.t3title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--warn);margin-bottom:14px}
+.t3list{display:flex;flex-direction:column;gap:9px}
+.t3item{display:flex;align-items:flex-start;gap:13px;padding:13px 15px;border-radius:6px;background:var(--surface);border:1px solid var(--border)}
+.t3rank{font-family:var(--mono);font-size:22px;font-weight:600;min-width:28px;line-height:1.2}
+.r1{color:#ffd700}.r2{color:#c0c0c0}.r3{color:#cd7f32}
+.t3lbl{font-weight:600;font-size:14px;margin-bottom:3px}
+.t3det{font-size:13px;color:var(--muted)}
+.t3badge{margin-left:auto;font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:4px;white-space:nowrap;align-self:center;background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
+
+/* MATRIX */
+.mwrap{overflow:auto;border:1px solid var(--border);border-radius:6px;max-height:580px}
+.mtable{border-collapse:collapse;font-family:var(--mono);font-size:12px;min-width:100%}
+.mtable th{position:sticky;top:0;background:var(--surface2);z-index:10;padding:11px 15px;border-bottom:2px solid var(--border2);border-right:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;white-space:nowrap;min-width:130px}
+.mtable th.idc{text-align:left;position:sticky;left:0;z-index:20;min-width:160px;color:var(--text)}
+.mtable td{padding:9px 15px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap}
+.mtable td.idc{position:sticky;left:0;background:var(--surface);z-index:5;text-align:left;color:var(--text);font-weight:500;border-right:2px solid var(--border2)}
+.mtable tr:hover td{background:var(--surface2)}
+.mtable tr:hover td.idc{background:var(--surface2)}
+.cn{background:rgba(0,212,170,.12)!important;color:var(--accent);font-weight:600}
+.mtable tr:hover td.cn{background:rgba(0,212,170,.2)!important}
+.cb{position:relative}
+.cb::after{content:'★';position:absolute;top:2px;right:3px;font-size:8px;color:var(--warn)}
+.cna{color:var(--muted);font-size:11px}
+.dhl{display:block;font-size:10px;color:var(--muted);margin-bottom:2px}
+.dhn{color:var(--text);font-weight:600;font-size:12px}
+.dht{font-size:10px;padding:1px 6px;border-radius:2px;margin-top:3px;display:inline-block}
+.tcu{background:rgba(0,153,255,.15);color:var(--accent2)}
+.tnw{background:rgba(0,212,170,.15);color:var(--accent)}
+
+/* CAPACITY TABLE */
+.ctable{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px}
+.ctable th{background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:10px 15px;border-bottom:1px solid var(--border);text-align:left}
+.ctable td{padding:10px 15px;border-bottom:1px solid var(--border)}
+.ctable tr:last-child td{border-bottom:none}
+.ctable tr:hover td{background:var(--surface2)}
+.cbar-w{width:90px;height:6px;background:var(--border);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:8px}
+.cbar{height:100%;border-radius:3px;background:var(--accent)}
+.cbar.ov{background:var(--danger)}
+.cbar.wn{background:var(--warn)}
+.cbadge{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:3px;white-space:nowrap}
+.cbadge-ok{background:rgba(0,212,170,.15);color:var(--accent)}
+.cbadge-wn{background:rgba(245,158,11,.15);color:var(--warn)}
+.cbadge-ov{background:rgba(239,68,68,.15);color:var(--danger);font-weight:600}
+
+/* TOOLBAR / LEGEND */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.legend{display:flex;align-items:center;gap:18px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.li{display:flex;align-items:center;gap:7px}
+.lsw{width:15px;height:15px;border-radius:3px}
+.lsw-n{background:rgba(0,212,170,.2);border:1px solid var(--accent)}
+.lsw-b{background:var(--surface2);border:1px solid var(--border);position:relative}
+.lsw-b::after{content:'★';position:absolute;top:-4px;right:-2px;font-size:9px;color:var(--warn)}
+
+/* LOADING */
+.lov{position:fixed;inset:0;background:rgba(13,15,18,.85);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.lov.on{display:flex}
+.lbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:38px 46px;text-align:center;min-width:320px}
+.spin{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltxt{font-family:var(--mono);font-size:14px;color:var(--text);margin-bottom:5px}
+.lstat{font-size:12px;color:var(--muted)}
+.lbar-w{width:100%;background:var(--border);border-radius:2px;height:3px;margin-top:12px;overflow:hidden}
+.lbar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0%}
+
+/* TOAST */
+.tcon{position:fixed;bottom:22px;right:22px;z-index:2000;display:flex;flex-direction:column;gap:7px}
+.tst{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:11px 16px;font-size:13px;font-family:var(--mono);animation:slideIn .2s ease;max-width:360px}
+.tst.err{border-color:var(--danger);color:var(--danger)}
+.tst.suc{border-color:var(--accent);color:var(--accent)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+
+/* MISC */
+.verr{color:var(--danger);font-size:12px;font-family:var(--mono);margin-top:5px}
+.tmuted{color:var(--muted);font-size:13px}
+.mt1{margin-top:6px}.mt2{margin-top:14px}
+
+@media(max-width:900px){
+  .wrap{padding:20px}
+  .sgrid{grid-template-columns:1fr}
+  .frow{grid-template-columns:1fr 1fr}
+  header{padding:0 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Distance<span>IQ</span></div>
+  <div class="hdr-sub">Workplace Commute Analyzer</div>
+</header>
+
+<div class="wrap">
+
+  <!-- STEP TABS -->
+  <div class="steps-nav">
+    <div class="step-tab active" id="tab-1" onclick="goTo(1)">
+      <div class="snum" id="snum-1">1</div>
+      <div><div class="slabel">Templates</div><div class="ssub">Download</div></div>
+    </div>
+    <div class="step-tab" id="tab-2" onclick="goTo(2)">
+      <div class="snum" id="snum-2">2</div>
+      <div><div class="slabel">Employee Data</div><div class="ssub">Home &amp; Office</div></div>
+    </div>
+    <div class="step-tab" id="tab-3" onclick="goTo(3)">
+      <div class="snum" id="snum-3">3</div>
+      <div><div class="slabel">New Locations</div><div class="ssub">Upload or Enter</div></div>
+    </div>
+    <div class="step-tab" id="tab-4" onclick="goTo(4)">
+      <div class="snum" id="snum-4">4</div>
+      <div><div class="slabel">Results</div><div class="ssub">Commute Analysis</div></div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1: TEMPLATES ===== -->
+  <div class="section active" id="sec-1">
+    <div class="panel">
+      <div class="ptitle">// Step 1 — Download Data Templates</div>
+
+      <div class="tbox">
+        <div class="tdesc">
+          <strong>Employee Template</strong>
+          One row per employee. Origin = home address. Current Destination = current office (optional, enables commute comparison).
+          <div class="pills">
+            <span class="pill">Unique Identifier</span><span class="pill">Origin Street</span><span class="pill">Origin City</span>
+            <span class="pill">Origin State</span><span class="pill">Origin Zip</span><span class="pill">Current Destination Street</span>
+            <span class="pill">Current Destination City</span><span class="pill">Current Destination State</span><span class="pill">Current Destination Zip</span>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="dlEmpTemplate()">⬇ Employee Template</button>
+      </div>
+
+      <div class="tbox">
+        <div class="tdesc">
+          <strong>New Locations Template</strong>
+          One row per potential office location. Label is used throughout all results. Capacity is optional — enter max headcount the building can hold.
+          <div class="pills">
+            <span class="pill">Location Label</span><span class="pill">Street</span><span class="pill">City</span>
+            <span class="pill">State</span><span class="pill">Zip</span><span class="pill">Capacity (optional)</span>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="dlLocTemplate()">⬇ Locations Template</button>
+      </div>
+
+      <div class="tbox">
+        <div class="tdesc">
+          <strong>ZIP Code Reference Template</strong>
+          <em>Optional but strongly recommended.</em> Upload a full ZIP→Lat/Long file as the guaranteed geocoding fallback. Download from <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a> (42,000+ ZIPs).
+          <div class="pills">
+            <span class="pill">Zip</span><span class="pill">Latitude</span><span class="pill">Longitude</span>
+          </div>
+        </div>
+        <button class="btn btn-g" onclick="dlZipTemplate()">⬇ ZIP Ref Template</button>
+      </div>
+    </div>
+    <div class="abar">
+      <button class="btn btn-p" onclick="goTo(2)">Continue to Upload →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: EMPLOYEE + ZIP UPLOAD ===== -->
+  <div class="section" id="sec-2">
+    <div class="panel">
+      <div class="ptitle">// Step 2 — Upload Employee Data</div>
+      <p class="tmuted mt1" style="margin-bottom:16px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office. USA addresses only.</p>
+      <div class="uzone" id="uz-emp">
+        <input type="file" accept=".xlsx,.xls,.csv" id="fi-emp" onchange="onEmpFile(this.files[0])">
+        <div class="uico">👥</div>
+        <div class="ulbl">Drop employee file here or click to browse</div>
+        <div class="usub">Accepts .xlsx, .xls, .csv</div>
+      </div>
+      <div id="emp-loaded"></div>
+      <div id="emp-preview"></div>
+      <div id="emp-err" class="verr"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">// ZIP Code Reference File <span style="color:var(--muted);font-weight:300">(Optional — Strongly Recommended)</span></div>
+      <p class="tmuted mt1" style="margin-bottom:14px">Guarantees geocoding for any US ZIP code. Without this, addresses that fail all API tiers will show "—". Download the full dataset from <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a>. Needs columns: <strong style="color:var(--text)">zip, latitude, longitude</strong>.</p>
+      <div class="uzone uzone-sm" id="uz-zip">
+        <input type="file" accept=".xlsx,.xls,.csv" id="fi-zip" onchange="onZipFile(this.files[0])">
+        <div class="uico">📍</div>
+        <div class="ulbl">Drop ZIP reference file here or click to browse</div>
+        <div class="usub">Zip | Latitude | Longitude</div>
+      </div>
+      <div id="zip-loaded"></div>
+      <div id="zip-err" class="verr"></div>
+    </div>
+
+    <div class="abar">
+      <button class="btn btn-s" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-p" id="btn-step2-next" disabled onclick="goTo(3)">Continue to New Locations →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: NEW LOCATIONS ===== -->
+  <div class="section" id="sec-3">
+    <div class="panel">
+      <div class="ptitle">// Step 3 — Potential New Office Locations</div>
+      <p class="tmuted mt1" style="margin-bottom:16px">Add the office locations being considered. Each needs a <strong style="color:var(--text)">Label</strong> (e.g. "Downtown HQ") — it will appear across all results.</p>
+
+      <div class="mode-tog">
+        <button class="mbtn active" id="mb-upload" onclick="setMode('upload')">📂 Upload File</button>
+        <button class="mbtn" id="mb-manual" onclick="setMode('manual')">✏️ Enter Manually</button>
+      </div>
+
+      <div id="loc-upload">
+        <div class="uzone" id="uz-dest">
+          <input type="file" accept=".xlsx,.xls,.csv" id="fi-dest" onchange="onDestFile(this.files[0])">
+          <div class="uico">🏢</div>
+          <div class="ulbl">Drop locations file here or click to browse</div>
+          <div class="usub">Use the Locations Template from Step 1</div>
+        </div>
+        <div id="dest-loaded"></div>
+        <div id="dest-preview"></div>
+      </div>
+
+      <div id="loc-manual" style="display:none">
+        <div class="dlist" id="dlist"></div>
+        <button class="add-dbtn" onclick="addDest()">+ Add Another Location</button>
+      </div>
+
+      <div id="dest-err" class="verr mt2"></div>
+    </div>
+    <div class="abar">
+      <button class="btn btn-s" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-p" onclick="runCalc()">Calculate Commute Distances →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: RESULTS ===== -->
+  <div class="section" id="sec-4">
+    <div class="panel">
+      <div class="ptitle">// Summary</div>
+      <div class="sgrid" id="sgrid"></div>
+      <div id="top3"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">// Commute Distance Matrix <span style="font-weight:300;color:var(--muted);font-size:10px;margin-left:8px">(straight-line miles, one-way)</span></div>
+      <div class="toolbar">
+        <div class="legend">
+          <div class="li"><div class="lsw lsw-n"></div>Under 50 mi</div>
+          <div class="li"><div class="lsw lsw-b"></div>Shortest (new locations)</div>
+        </div>
+        <button class="btn btn-g" onclick="exportXlsx()">⬇ Export Results (.xlsx)</button>
+      </div>
+      <div class="mwrap" id="mwrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">// Capacity Allocation by New Location</div>
+      <p class="tmuted mt1" style="margin-bottom:14px">Each employee assigned to the new location with their lowest mileage. Sorted by employee count.</p>
+      <div id="capsec"></div>
+    </div>
+
+    <div class="abar">
+      <button class="btn btn-s" onclick="goTo(3)">← Modify Locations</button>
+      <button class="btn btn-g" onclick="resetAll()">↺ Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="lov" id="lov">
+  <div class="lbox">
+    <div class="spin"></div>
+    <div class="ltxt">Analyzing Commute Distances</div>
+    <div class="lstat" id="lstat">Preparing...</div>
+    <div class="lbar-w"><div class="lbar" id="lbar"></div></div>
+  </div>
+</div>
+<div class="tcon" id="tcon"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+var empData     = [];   // employee rows
+var newLocs     = [];   // new location rows {label,street,city,state,zip,capacity}
+var zipRef      = new Map(); // zip5 -> {lat,lon}
+var resultsData = null;
+var destMode    = 'upload';
+var dCnt        = 0;
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function goTo(n) {
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('sec-'+n).classList.add('active');
+  document.getElementById('tab-'+n).classList.add('active');
+}
+function markDone(n) {
+  document.getElementById('snum-'+n).textContent = '✓';
+  document.getElementById('tab-'+n).classList.add('done');
+}
+
+// ─────────────────────────────────────────────
+// TEMPLATE DOWNLOADS
+// ─────────────────────────────────────────────
+function dlEmpTemplate() {
+  var cols = ['Unique Identifier','Origin Street','Origin City','Origin State','Origin Zip',
+    'Current Destination Street','Current Destination City','Current Destination State','Current Destination Zip'];
+  var rows = [
+    ['EMP-001','123 Main St','Pittsburgh','PA','15222','500 Grant St','Pittsburgh','PA','15219'],
+    ['EMP-002','789 Oak Ave','Bethel Park','PA','15102','','','','']
+  ];
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet([cols].concat(rows));
+  ws['!cols'] = cols.map(function(){ return {wch:26}; });
+  XLSX.utils.book_append_sheet(wb, ws, 'Employees');
+  XLSX.writeFile(wb, 'DistanceIQ_Employee_Template.xlsx');
+  toast('Employee template downloaded!', 'suc');
+}
+
+function dlLocTemplate() {
+  var cols = ['Location Label','Street','City','State','Zip','Capacity'];
+  var rows = [
+    ['Downtown HQ','500 Grant St','Pittsburgh','PA','15219', 250],
+    ['Westside Hub','1200 Penn Ave','Pittsburgh','PA','15222', '']
+  ];
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet([cols].concat(rows));
+  ws['!cols'] = cols.map(function(){ return {wch:22}; });
+  XLSX.utils.book_append_sheet(wb, ws, 'Locations');
+  XLSX.writeFile(wb, 'DistanceIQ_Locations_Template.xlsx');
+  toast('Locations template downloaded!', 'suc');
+}
+
+function dlZipTemplate() {
+  var cols = ['Zip','Latitude','Longitude'];
+  var rows = [['15222',40.4426,-80.0007],['15219',40.4576,-79.9757],['90210',34.0843,-118.4066]];
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet([cols].concat(rows));
+  ws['!cols'] = [{wch:10},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, 'ZIP Reference');
+  XLSX.writeFile(wb, 'DistanceIQ_ZIP_Reference_Template.xlsx');
+  toast('ZIP template downloaded!', 'suc');
+}
+
+// ─────────────────────────────────────────────
+// DRAG & DROP SETUP
+// ─────────────────────────────────────────────
+function setupDrop(zoneId, handler) {
+  var zone = document.getElementById(zoneId);
+  if (!zone) return;
+  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', function(){ zone.classList.remove('drag'); });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault(); zone.classList.remove('drag');
+    var f = e.dataTransfer.files[0]; if (f) handler(f);
+  });
+}
+
+// ─────────────────────────────────────────────
+// EMPLOYEE FILE
+// ─────────────────────────────────────────────
+setupDrop('uz-emp', function(f){ onEmpFile(f); });
+
+function onEmpFile(file) {
+  if (!file) return;
+  readXlsx(file, function(rows, err) {
+    if (err) { setErr('emp-err', err); return; }
+    if (rows.length < 2) { setErr('emp-err','File appears empty.'); return; }
+    var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
+    var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
+    var cm = {
+      id:      fc(hdrs,['unique identifier','id','identifier','employee id']),
+      oSt:     fc(hdrs,['origin street','home street']),
+      oCity:   fc(hdrs,['origin city','home city']),
+      oState:  fc(hdrs,['origin state','home state']),
+      oZip:    fc(hdrs,['origin zip','home zip']),
+      dSt:     fc(hdrs,['current destination street','dest street','destination street','office street']),
+      dCity:   fc(hdrs,['current destination city','dest city','destination city','office city']),
+      dState:  fc(hdrs,['current destination state','dest state','destination state','office state']),
+      dZip:    fc(hdrs,['current destination zip','dest zip','destination zip','office zip'])
+    };
+    if (cm.id === -1 || cm.oSt === -1) { setErr('emp-err','Cannot find required columns. Use the employee template.'); return; }
+    empData = data.map(function(r){
+      return {
+        id:        s(r[cm.id]),
+        oStreet:   s(r[cm.oSt]),
+        oCity:     s(r[cm.oCity]),
+        oState:    s(r[cm.oState]),
+        oZip:      s(r[cm.oZip]),
+        dStreet:   cm.dSt    > -1 ? s(r[cm.dSt])    : '',
+        dCity:     cm.dCity  > -1 ? s(r[cm.dCity])  : '',
+        dState:    cm.dState > -1 ? s(r[cm.dState]) : '',
+        dZip:      cm.dZip   > -1 ? s(r[cm.dZip])   : ''
+      };
+    }).filter(function(r){ return r.id && r.oStreet; });
+    if (!empData.length) { setErr('emp-err','No valid rows found.'); return; }
+    clearErr('emp-err');
+    showLoaded('emp-loaded', file.name, empData.length + ' employees loaded');
+    showEmpPreview();
+    document.getElementById('btn-step2-next').disabled = false;
+    markDone(2);
+  });
+}
+
+function showEmpPreview() {
+  var prev = empData.slice(0,5);
+  var hasDest = empData.some(function(r){ return r.dStreet; });
+  var html = '<div class="ptable-wrap"><table class="ptable"><thead><tr>' +
+    '<th>Employee ID</th><th>Home Street</th><th>City</th><th>State</th><th>Zip</th>' +
+    (hasDest ? '<th>Current Office</th><th>City</th><th>State</th><th>Zip</th>' : '') +
+    '</tr></thead><tbody>';
+  prev.forEach(function(r){
+    html += '<tr><td>'+r.id+'</td><td>'+r.oStreet+'</td><td>'+r.oCity+'</td><td>'+r.oState+'</td><td>'+r.oZip+'</td>';
+    if (hasDest) html += '<td>'+(r.dStreet||'—')+'</td><td>'+(r.dCity||'—')+'</td><td>'+(r.dState||'—')+'</td><td>'+(r.dZip||'—')+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += '<div class="pcnt">Showing '+prev.length+' of '+empData.length+' employees</div>';
+  document.getElementById('emp-preview').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// ZIP REFERENCE FILE
+// ─────────────────────────────────────────────
+setupDrop('uz-zip', function(f){ onZipFile(f); });
+
+function onZipFile(file) {
+  if (!file) return;
+  readXlsx(file, function(rows, err) {
+    if (err) { setErr('zip-err', err); return; }
+    if (rows.length < 2) { setErr('zip-err','File appears empty.'); return; }
+    var hdrs = rows[0].map(function(h){ return String(h||'').trim().toLowerCase(); });
+    var zipCol = hdrs.findIndex(function(h){ return h.includes('zip') || h.includes('postal'); });
+    var latCol = hdrs.findIndex(function(h){ return h.includes('lat'); });
+    var lonCol = hdrs.findIndex(function(h){ return h.includes('lon') || h.includes('lng'); });
+    if (zipCol === -1 || latCol === -1 || lonCol === -1) {
+      setErr('zip-err','Cannot find Zip, Latitude, Longitude columns.'); return;
+    }
+    zipRef = new Map();
+    var loaded = 0;
+    for (var i = 1; i < rows.length; i++) {
+      var row = rows[i];
+      // Normalize ZIP: handle numeric (15222.0 -> "15222")
+      var rawZip = String(row[zipCol]||'').trim().split('.')[0].replace(/\D/g,'');
+      if (!rawZip) continue;
+      var z5 = rawZip.substring(0,5).padStart(5,'0');
+      var lat = parseFloat(row[latCol]);
+      var lon = parseFloat(row[lonCol]);
+      if (!isNaN(lat) && !isNaN(lon)) { zipRef.set(z5, {lat:lat, lon:lon}); loaded++; }
+    }
+    if (!loaded) { setErr('zip-err','No valid ZIP/Lat/Long rows found.'); return; }
+    clearErr('zip-err');
+    showLoaded('zip-loaded', file.name, loaded.toLocaleString() + ' ZIP codes loaded as fallback');
+  });
+}
+
+// ─────────────────────────────────────────────
+// DESTINATION MODE
+// ─────────────────────────────────────────────
+function setMode(mode) {
+  destMode = mode;
+  document.getElementById('mb-upload').classList.toggle('active', mode === 'upload');
+  document.getElementById('mb-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('loc-upload').style.display = mode === 'upload' ? '' : 'none';
+  document.getElementById('loc-manual').style.display = mode === 'manual' ? '' : 'none';
+  clearErr('dest-err');
+}
+
+// ─────────────────────────────────────────────
+// DESTINATION FILE
+// ─────────────────────────────────────────────
+setupDrop('uz-dest', function(f){ onDestFile(f); });
+
+function onDestFile(file) {
+  if (!file) return;
+  readXlsx(file, function(rows, err) {
+    if (err) { setErr('dest-err', err); return; }
+    if (rows.length < 2) { setErr('dest-err','File appears empty.'); return; }
+    var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
+    var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
+    var cm = {
+      label:  fc(hdrs,['location label','label','name','office name','location name']),
+      street: fc(hdrs,['street','address','street address']),
+      city:   fc(hdrs,['city']),
+      state:  fc(hdrs,['state']),
+      zip:    fc(hdrs,['zip','postal','zipcode','zip code']),
+      cap:    fc(hdrs,['capacity','max','headcount','max capacity','building capacity'])
+    };
+    if (cm.label === -1 || cm.street === -1) { setErr('dest-err','Cannot find required columns. Use the Locations Template.'); return; }
+    newLocs = data.map(function(r){
+      return {
+        label:    s(r[cm.label]),
+        street:   s(r[cm.street]),
+        city:     cm.city   > -1 ? s(r[cm.city])  : '',
+        state:    cm.state  > -1 ? s(r[cm.state]) : '',
+        zip:      cm.zip    > -1 ? s(r[cm.zip])   : '',
+        capacity: cm.cap    > -1 ? r[cm.cap]       : null
+      };
+    }).filter(function(r){ return r.label && r.street; });
+    if (!newLocs.length) { setErr('dest-err','No valid location rows found.'); return; }
+    clearErr('dest-err');
+    showLoaded('dest-loaded', file.name, newLocs.length + ' locations loaded');
+    showDestPreview();
+    markDone(3);
+  });
+}
+
+function showDestPreview() {
+  var html = '<div class="ptable-wrap"><table class="ptable"><thead><tr>' +
+    '<th>Label</th><th>Street</th><th>City</th><th>State</th><th>Zip</th><th>Capacity</th>' +
+    '</tr></thead><tbody>';
+  newLocs.forEach(function(r){
+    html += '<tr><td>'+r.label+'</td><td>'+r.street+'</td><td>'+r.city+'</td><td>'+r.state+'</td><td>'+r.zip+'</td><td>'+(r.capacity||'—')+'</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  html += '<div class="pcnt">'+newLocs.length+' location(s) loaded</div>';
+  document.getElementById('dest-preview').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// MANUAL DESTINATIONS
+// ─────────────────────────────────────────────
+function initDests() {
+  document.getElementById('dlist').innerHTML = '';
+  dCnt = 0;
+  addDest();
+}
+
+function addDest() {
+  dCnt++;
+  var id = dCnt;
+  var el = document.createElement('div');
+  el.className = 'ditem'; el.id = 'di-'+id;
+  el.innerHTML =
+    '<div class="ditem-hdr">' +
+      '<div class="ditem-num">// Location '+id+'</div>' +
+      (id > 1 ? '<button class="ditem-rm" onclick="rmDest('+id+')">✕</button>' : '') +
+    '</div>' +
+    '<div class="frow">' +
+      '<div class="fg"><label class="flbl">Label / Name</label><input class="finp" placeholder="Downtown HQ" data-f="label"></div>' +
+      '<div class="fg"><label class="flbl">Street Address</label><input class="finp" placeholder="500 Grant St" data-f="street"></div>' +
+      '<div class="fg"><label class="flbl">City</label><input class="finp" placeholder="Pittsburgh" data-f="city"></div>' +
+      '<div class="fg"><label class="flbl">State</label><input class="finp" placeholder="PA" maxlength="2" data-f="state"></div>' +
+      '<div class="fg"><label class="flbl">ZIP</label><input class="finp" placeholder="15219" maxlength="10" data-f="zip"></div>' +
+    '</div>';
+  document.getElementById('dlist').appendChild(el);
+}
+
+function rmDest(id) {
+  var el = document.getElementById('di-'+id);
+  if (el) el.remove();
+}
+
+function getManualDests() {
+  var out = [];
+  document.querySelectorAll('.ditem').forEach(function(item){
+    function g(f){ var el = item.querySelector('[data-f="'+f+'"]'); return el ? el.value.trim() : ''; }
+    if (g('street') && g('city')) {
+      out.push({ label: g('label') || g('city'), street: g('street'), city: g('city'), state: g('state'), zip: g('zip'), capacity: null });
+    }
+  });
+  return out;
+}
+
+// ─────────────────────────────────────────────
+// GEOCODING
+// ─────────────────────────────────────────────
+function haversine(lat1, lon1, lat2, lon2) {
+  var R = 3958.8;
+  var dLat = (lat2-lat1) * Math.PI/180;
+  var dLon = (lon2-lon1) * Math.PI/180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+          Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function normZip(zip) {
+  // Split on '.' first to handle Excel numeric ZIPs like 15222.0
+  return String(zip||'').trim().split('.')[0].replace(/\D/g,'').substring(0,5).padStart(5,'0');
+}
+
+async function geocode(street, city, state, zip) {
+  var z5 = normZip(zip);
+
+  // Tier 1: US Census Bureau (full address)
+  try {
+    var p = new URLSearchParams({street:street, city:city, state:state, zip:z5, benchmark:'Public_AR_Current', format:'json'});
+    var r = await fetch('https://geocoding.geo.census.gov/geocoder/locations/address?'+p);
+    if (r.ok) {
+      var d = await r.json();
+      var m = d && d.result && d.result.addressMatches;
+      if (m && m.length > 0) return {lat:m[0].coordinates.y, lon:m[0].coordinates.x};
+    }
+  } catch(e) {}
+
+  // Tier 2: Zippopotam.us ZIP centroid
+  if (z5.length === 5) {
+    try {
+      var r2 = await fetch('https://api.zippopotam.us/us/'+z5);
+      if (r2.ok) {
+        var d2 = await r2.json();
+        if (d2.places && d2.places.length > 0) return {lat:parseFloat(d2.places[0].latitude), lon:parseFloat(d2.places[0].longitude)};
+      }
+    } catch(e) {}
+  }
+
+  // Tier 3: Census with generic street (city-level approximation)
+  var attempts = [
+    {street:'1 Main St', city:city, state:state, zip:z5},
+    {street:'1 Main St', city:city, state:state, zip:''}
+  ];
+  for (var i = 0; i < attempts.length; i++) {
+    try {
+      var a = attempts[i];
+      var p3 = new URLSearchParams({street:a.street, city:a.city, state:a.state, zip:a.zip, benchmark:'Public_AR_Current', format:'json'});
+      var r3 = await fetch('https://geocoding.geo.census.gov/geocoder/locations/address?'+p3);
+      if (r3.ok) {
+        var d3 = await r3.json();
+        var m3 = d3 && d3.result && d3.result.addressMatches;
+        if (m3 && m3.length > 0) return {lat:m3[0].coordinates.y, lon:m3[0].coordinates.x};
+      }
+    } catch(e) {}
+  }
+
+  // Tier 4: Uploaded ZIP reference file
+  if (z5.length === 5 && zipRef.size > 0) {
+    var zc = zipRef.get(z5);
+    if (zc) return {lat:zc.lat, lon:zc.lon};
+  }
+
+  // Tier 4b: Small embedded table for most common ZIPs
+  var zc2 = ZIPT.get(z5);
+  if (zc2) return {lat:zc2[0], lon:zc2[1]};
+
+  return null;
+}
+
+// Embedded ZIP table — top US ZIPs by population (fallback of last resort)
+var ZIPT = (function(){
+  var raw = [
+    ['10001',40.7484,-73.9967],['10002',40.7157,-73.9863],['10003',40.7317,-73.9892],['10007',40.7135,-74.0078],
+    ['10016',40.7474,-73.9794],['10017',40.7522,-73.9718],['10019',40.7660,-73.9863],['10022',40.7592,-73.9689],
+    ['10024',40.7844,-73.9793],['10025',40.7971,-73.9680],['10026',40.8033,-73.9551],['10036',40.7601,-73.9908],
+    ['10128',40.7791,-73.9491],['11201',40.6926,-73.9907],['11211',40.7126,-73.9507],['11215',40.6601,-73.9857],
+    ['11217',40.6826,-73.9807],['11221',40.6926,-73.9257],['11222',40.7226,-73.9507],['11226',40.6476,-73.9557],
+    ['11238',40.6726,-73.9657],['10451',40.8268,-73.9213],['10452',40.8394,-73.9237],['10456',40.8295,-73.9103],
+    ['10458',40.8613,-73.8924],['10460',40.8384,-73.8819],['10467',40.8823,-73.8793],['10468',40.8724,-73.9051],
+    ['15201',40.4726,-79.9557],['15202',40.5026,-80.0607],['15203',40.4276,-79.9807],['15204',40.4526,-80.0607],
+    ['15205',40.4426,-80.0857],['15206',40.4626,-79.9157],['15207',40.3976,-79.9307],['15208',40.4626,-79.8957],
+    ['15209',40.4926,-79.9557],['15210',40.4026,-79.9707],['15211',40.4276,-80.0007],['15212',40.4626,-80.0057],
+    ['15213',40.4426,-79.9607],['15214',40.4726,-80.0307],['15215',40.4876,-79.8757],['15216',40.4026,-80.0307],
+    ['15217',40.4226,-79.9007],['15218',40.4326,-79.8807],['15219',40.4576,-79.9757],['15220',40.4026,-80.0607],
+    ['15221',40.4526,-79.8607],['15222',40.4426,-80.0007],['15223',40.5076,-79.9257],['15224',40.4626,-79.9457],
+    ['15225',40.4876,-80.0707],['15226',40.4026,-80.0207],['15227',40.3876,-79.9857],['15228',40.3776,-80.0357],
+    ['15229',40.5076,-80.0357],['15232',40.4576,-79.9257],['15233',40.4576,-80.0207],['15234',40.3726,-80.0207],
+    ['15235',40.4626,-79.8357],['15236',40.3576,-79.9707],['15237',40.5576,-80.0107],['15238',40.5176,-79.8657],
+    ['15239',40.4726,-79.8107],['15241',40.3376,-80.0807],['15243',40.3876,-80.1007],['15301',40.1726,-80.2457],
+    ['19101',39.9526,-75.1652],['19103',39.9493,-75.1728],['19104',39.9626,-75.1943],['19107',39.9508,-75.1588],
+    ['19111',40.0626,-75.0743],['19120',40.0326,-75.1243],['19124',40.0176,-75.0843],['19130',39.9726,-75.1643],
+    ['19140',40.0176,-75.1543],['19143',39.9426,-75.2243],['19144',40.0376,-75.1743],['19146',39.9326,-75.1843],
+    ['19147',39.9426,-75.1443],['19148',39.9126,-75.1443],['19149',40.0376,-75.0593],['19152',40.0526,-75.0393],
+    ['60601',41.8827,-87.6233],['60607',41.8718,-87.6562],['60608',41.8527,-87.6632],['60609',41.8212,-87.6511],
+    ['60610',41.9008,-87.6365],['60611',41.8977,-87.6205],['60614',41.9243,-87.6484],['60615',41.8014,-87.5994],
+    ['60616',41.8411,-87.6296],['60618',41.9485,-87.7037],['60619',41.7541,-87.6019],['60620',41.7394,-87.6469],
+    ['60621',41.7696,-87.6495],['60622',41.9022,-87.6772],['60623',41.8535,-87.7183],['60625',41.9731,-87.7009],
+    ['60626',42.0068,-87.6696],['60629',41.7778,-87.7016],['60630',41.9863,-87.7581],['60632',41.8100,-87.7183],
+    ['60634',41.9468,-87.7962],['60636',41.7813,-87.6611],['60637',41.7824,-87.6019],['60639',41.9183,-87.7621],
+    ['60640',41.9742,-87.6812],['60641',41.9578,-87.7646],['60647',41.9219,-87.7109],['60651',41.8994,-87.7411],
+    ['60657',41.9393,-87.6540],['77001',29.7505,-95.3670],['77002',29.7518,-95.3674],['77004',29.7202,-95.3718],
+    ['77006',29.7466,-95.3924],['77007',29.7643,-95.3996],['77008',29.7809,-95.4105],['77009',29.7826,-95.3652],
+    ['77019',29.7553,-95.4209],['77024',29.7786,-95.4832],['77025',29.6934,-95.4371],['77027',29.7474,-95.4321],
+    ['77030',29.7068,-95.3960],['77036',29.7104,-95.5227],['77042',29.7393,-95.5497],['77055',29.7952,-95.5245],
+    ['77056',29.7541,-95.4634],['77057',29.7452,-95.4852],['77063',29.7354,-95.5079],['77071',29.6640,-95.5013],
+    ['77077',29.7474,-95.5803],['77079',29.7658,-95.5585],['77080',29.8101,-95.5081],['77081',29.7040,-95.4615],
+    ['77096',29.6739,-95.4834],['77098',29.7388,-95.4127],
+    ['30301',33.7490,-84.3880],['30305',33.8430,-84.3698],['30306',33.7867,-84.3498],['30307',33.7697,-84.3268],
+    ['30308',33.7696,-84.3726],['30309',33.7918,-84.3845],['30310',33.7275,-84.4178],['30312',33.7454,-84.3682],
+    ['30313',33.7574,-84.3964],['30314',33.7601,-84.4313],['30316',33.7190,-84.3369],['30317',33.7457,-84.3122],
+    ['30318',33.7890,-84.4265],['30319',33.8690,-84.3279],['30324',33.8246,-84.3630],['30326',33.8452,-84.3627],
+    ['30327',33.8576,-84.4179],['30329',33.8090,-84.3263],['30331',33.7188,-84.5116],['30338',33.9440,-84.3467],
+    ['30339',33.8624,-84.4671],['30340',33.8990,-84.3029],['30342',33.8840,-84.3758],['30344',33.6890,-84.4028],
+    ['30345',33.8290,-84.2763],['30350',34.0090,-84.3463],['30360',33.9490,-84.3062],
+    ['90001',33.9731,-118.2479],['90003',33.9640,-118.2733],['90005',34.0587,-118.3071],['90007',34.0249,-118.2812],
+    ['90011',34.0070,-118.2587],['90012',34.0573,-118.2397],['90015',34.0378,-118.2662],['90017',34.0527,-118.2679],
+    ['90019',34.0297,-118.3399],['90020',34.0659,-118.3062],['90023',34.0247,-118.1918],['90024',34.0624,-118.4427],
+    ['90025',34.0493,-118.4527],['90026',34.0770,-118.2633],['90028',34.0981,-118.3293],['90029',34.0898,-118.2934],
+    ['90031',34.0805,-118.2109],['90034',34.0235,-118.3985],['90037',34.0012,-118.2823],['90038',34.0875,-118.3220],
+    ['90041',34.1318,-118.2085],['90042',34.1170,-118.1886],['90044',33.9558,-118.3092],['90046',34.0996,-118.3637],
+    ['90047',33.9614,-118.3071],['90048',34.0748,-118.3720],['90057',34.0601,-118.2737],['90062',34.0025,-118.3063],
+    ['90065',34.1095,-118.2271],['90066',34.0014,-118.4307],['90068',34.1126,-118.3363],['90210',34.0843,-118.4066],
+    ['90230',33.9977,-118.3848],['90247',33.8852,-118.2949],['90250',33.8972,-118.3497],['90265',34.0376,-118.8217],
+    ['90272',34.0432,-118.5285],['90401',34.0196,-118.4908],['90501',33.8349,-118.3119],
+    ['85001',33.4484,-112.0740],['85004',33.4547,-112.0672],['85006',33.4621,-112.0379],['85008',33.4607,-112.0065],
+    ['85012',33.5101,-112.0640],['85013',33.5119,-112.0784],['85014',33.5119,-112.0484],['85015',33.5006,-112.0982],
+    ['85016',33.4952,-112.0355],['85018',33.4906,-111.9996],['85020',33.5625,-112.0484],['85021',33.5574,-112.0888],
+    ['85022',33.6105,-112.0484],['85028',33.5657,-111.9996],['85029',33.5940,-112.1212],['85032',33.5834,-111.9820],
+    ['85034',33.4349,-112.0307],['85040',33.3857,-112.0007],['85041',33.3607,-112.0488],['85044',33.3540,-112.0007],
+    ['85048',33.3240,-112.0188],['85050',33.6757,-111.9820],['85051',33.5424,-112.1219],['85085',33.7441,-112.1419],
+    ['98101',47.6080,-122.3390],['98102',47.6350,-122.3227],['98103',47.6744,-122.3450],['98104',47.6010,-122.3301],
+    ['98105',47.6613,-122.2921],['98107',47.6685,-122.3773],['98109',47.6384,-122.3501],['98112',47.6335,-122.2968],
+    ['98115',47.6837,-122.2968],['98116',47.5684,-122.3937],['98117',47.6887,-122.3703],['98118',47.5476,-122.2803],
+    ['98119',47.6380,-122.3646],['98122',47.6113,-122.3039],['98125',47.7175,-122.3025],['98126',47.5631,-122.3760],
+    ['98133',47.7391,-122.3437],['98144',47.5950,-122.2952],['98199',47.6521,-122.4014],
+    ['02101',42.3601,-71.0589],['02108',42.3576,-71.0636],['02109',42.3632,-71.0526],['02111',42.3521,-71.0624],
+    ['02113',42.3660,-71.0559],['02114',42.3628,-71.0738],['02115',42.3437,-71.0960],['02116',42.3511,-71.0793],
+    ['02118',42.3359,-71.0694],['02119',42.3233,-71.0877],['02120',42.3315,-71.0977],['02125',42.3136,-71.0555],
+    ['02127',42.3359,-71.0499],['02128',42.3660,-71.0326],['02129',42.3787,-71.0593],['02130',42.3063,-71.1200],
+    ['02134',42.3511,-71.1322],['02135',42.3534,-71.1538],['02138',42.3787,-71.1255],['02139',42.3660,-71.1087],
+    ['02140',42.3863,-71.1237],['02143',42.3827,-71.1015],['02144',42.3963,-71.1255],
+    ['48201',42.3314,-83.0457],['48202',42.3747,-83.0649],['48203',42.4264,-83.0747],['48205',42.4014,-83.0148],
+    ['48207',42.3481,-83.0248],['48208',42.3514,-83.0749],['48209',42.3081,-83.1147],['48210',42.3347,-83.1348],
+    ['48211',42.3847,-83.0248],['48213',42.4047,-82.9898],['48214',42.3681,-82.9798],['48216',42.3314,-83.0698],
+    ['48219',42.3947,-83.2148],['48221',42.4347,-83.1148],['48223',42.3847,-83.2148],['48224',42.3881,-82.9448],
+    ['48226',42.3314,-83.0459],['48227',42.3747,-83.1648],['48228',42.3414,-83.1948],['48234',42.4181,-83.0648],
+    ['48235',42.4147,-83.1648],['48237',42.4547,-83.1048],['48238',42.3847,-83.1448],['48240',42.4247,-83.2148],
+    ['20001',38.9101,-77.0147],['20002',38.9001,-77.0047],['20003',38.8801,-77.0047],['20005',38.9031,-77.0277],
+    ['20007',38.9128,-77.0733],['20008',38.9444,-77.0663],['20009',38.9198,-77.0413],['20010',38.9284,-77.0267],
+    ['20011',38.9484,-77.0047],['20015',38.9684,-77.0647],['20016',38.9378,-77.0847],['20017',38.9384,-77.0047],
+    ['20019',38.8884,-76.9547],['20020',38.8584,-76.9847],['20024',38.8681,-77.0292],['20036',38.9097,-77.0430],
+    ['20037',38.9003,-77.0503],['33101',25.7617,-80.1918],['33125',25.7726,-80.2308],['33127',25.8126,-80.2008],
+    ['33128',25.7726,-80.1908],['33129',25.7526,-80.1908],['33130',25.7626,-80.1958],['33131',25.7626,-80.1908],
+    ['33132',25.7876,-80.1758],['33133',25.7326,-80.2358],['33134',25.7526,-80.2858],['33135',25.7626,-80.2558],
+    ['33136',25.7826,-80.2058],['33137',25.8026,-80.1958],['33138',25.8426,-80.1758],['33139',25.7826,-80.1358],
+    ['33140',25.8126,-80.1358],['33141',25.8426,-80.1358],['33143',25.7026,-80.2958],['33145',25.7626,-80.2258],
+    ['33146',25.7126,-80.2758],['33150',25.8626,-80.2008],['33155',25.7326,-80.3258],['33160',25.9226,-80.1458],
+    ['33162',25.9426,-80.1758],['33172',25.7626,-80.3858],['33174',25.7626,-80.3658],['33176',25.6526,-80.3458],
+    ['33179',25.9526,-80.1858],['33180',25.9626,-80.1458],['33182',25.7826,-80.4158],['33186',25.6826,-80.3958],
+    ['33193',25.7026,-80.4358],['33196',25.6826,-80.4258]
+  ];
+  var m = new Map();
+  raw.forEach(function(r){ m.set(String(r[0]).padStart(5,'0'), [r[1],r[2]]); });
+  return m;
+})();
+
+// ─────────────────────────────────────────────
+// CALCULATION
+// ─────────────────────────────────────────────
+function setProgress(pct, msg) {
+  document.getElementById('lbar').style.width = pct + '%';
+  document.getElementById('lstat').textContent = msg;
+}
+
+async function runCalc() {
+  clearErr('dest-err');
+  var dests = destMode === 'upload' ? newLocs : getManualDests();
+  if (!dests.length) {
+    setErr('dest-err', destMode === 'upload'
+      ? 'Please upload a locations file first.'
+      : 'Enter at least one location (label, street and city required).');
+    return;
+  }
+
+  document.getElementById('lov').classList.add('on');
+  setProgress(0, 'Preparing...');
+
+  try {
+    var addrMap = new Map();
+    var toGeo = [];
+    var seen = new Set();
+
+    function ak(st, ci, sta, zi) { return (st+'|'+ci+'|'+sta+'|'+zi).toLowerCase(); }
+    function enq(st, ci, sta, zi) {
+      var k = ak(st,ci,sta,zi);
+      if (!seen.has(k)) { seen.add(k); toGeo.push({k:k, street:st, city:ci, state:sta, zip:zi}); }
+    }
+
+    empData.forEach(function(r){ enq(r.oStreet, r.oCity, r.oState, r.oZip); });
+    empData.forEach(function(r){ if (r.dStreet && r.dCity) enq(r.dStreet, r.dCity, r.dState, r.dZip); });
+    dests.forEach(function(d){ enq(d.street, d.city, d.state, d.zip); });
+
+    var total = toGeo.length;
+    var failCount = 0;
+
+    for (var i = 0; i < total; i++) {
+      var a = toGeo[i];
+      setProgress(5 + (i/total)*82, 'Geocoding ' + (i+1) + '/' + total + ': ' + (a.city||a.zip) + ', ' + a.state);
+      var coords = await geocode(a.street, a.city, a.state, a.zip);
+      addrMap.set(a.k, coords);
+      if (!coords) failCount++;
+    }
+
+    setProgress(90, 'Computing distances...');
+
+    var hasCD = empData.some(function(r){ return r.dStreet && r.dCity; });
+    var columns = [];
+    if (hasCD) columns.push({label:'Current Office', type:'current'});
+    dests.forEach(function(d){ columns.push({label:d.label, type:'new'}); });
+
+    var rows = [];
+    var failedEmps = 0;
+    empData.forEach(function(emp){
+      var ok = ak(emp.oStreet, emp.oCity, emp.oState, emp.oZip);
+      var oc = addrMap.get(ok);
+      if (!oc) failedEmps++;
+      var distances = [];
+      if (hasCD) {
+        if (emp.dStreet && emp.dCity) {
+          var dk = ak(emp.dStreet, emp.dCity, emp.dState, emp.dZip);
+          var dc = addrMap.get(dk);
+          distances.push((oc && dc) ? Math.round(haversine(oc.lat, oc.lon, dc.lat, dc.lon)*10)/10 : null);
+        } else distances.push(null);
+      }
+      dests.forEach(function(d){
+        var dk2 = ak(d.street, d.city, d.state, d.zip);
+        var dc2 = addrMap.get(dk2);
+        distances.push((oc && dc2) ? Math.round(haversine(oc.lat, oc.lon, dc2.lat, dc2.lon)*10)/10 : null);
+      });
+      rows.push({id:emp.id, distances:distances, failed:!oc});
+    });
+
+    setProgress(100, 'Complete!');
+    await new Promise(function(res){ setTimeout(res, 350); });
+    document.getElementById('lov').classList.remove('on');
+
+    if (failCount > 0) toast(failCount + ' address(es) could not be located — shown as "—"', 'err');
+
+    resultsData = {columns:columns, rows:rows, hasCD:hasCD, dests:dests, failedEmps:failedEmps};
+    markDone(3);
+    buildResults(resultsData);
+    goTo(4);
+
+  } catch(err) {
+    document.getElementById('lov').classList.remove('on');
+    toast('Error: ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+// ─────────────────────────────────────────────
+// BUILD RESULTS
+// ─────────────────────────────────────────────
+function buildResults(rd) {
+  var columns = rd.columns, rows = rd.rows, hasCD = rd.hasCD, dests = rd.dests, failedEmps = rd.failedEmps;
+  var total = rows.length;
+  var newOff = hasCD ? 1 : 0;
+  var newCols = columns.filter(function(c){ return c.type === 'new'; });
+
+  // SUMMARY
+  var w50 = rows.filter(function(r){ return r.distances.some(function(d){ return d !== null && d < 50; }); }).length;
+  var pct50 = total > 0 ? ((w50/total)*100).toFixed(1) : 0;
+  var failCard = failedEmps > 0
+    ? '<div class="scard al"><div class="slb">⚠ Unresolved Addresses</div><div class="sval dg">'+failedEmps+'</div><div class="ssub">Employee home address(es) could not be geocoded — shown as "—". Upload a ZIP reference file (Step 2) to improve coverage.</div></div>'
+    : '';
+  document.getElementById('sgrid').innerHTML =
+    '<div class="scard"><div class="slb">Total Employees</div><div class="sval">'+total+'</div><div class="ssub">Unique records analyzed</div></div>' +
+    '<div class="scard hi"><div class="slb">Within 50 Miles</div><div class="sval ac">'+w50+'</div><div class="ssub">'+pct50+'% have ≥1 location within reasonable commute</div></div>' +
+    failCard;
+
+  // TOP 3
+  buildTop3(rows, newCols, newOff, total, hasCD);
+
+  // MATRIX
+  var tbl = '<table class="mtable"><thead><tr><th class="idc">Employee ID</th>';
+  columns.forEach(function(c){
+    tbl += '<th><span class="dhl">'+(c.type==='current'?'Current Office':'New Location')+'</span>' +
+      '<span class="dhn">'+(c.label.length>28?c.label.substring(0,26)+'…':c.label)+'</span>' +
+      '<br><span class="dht '+(c.type==='current'?'tcu':'tnw')+'">'+(c.type==='current'?'Current':'New')+'</span></th>';
+  });
+  tbl += '</tr></thead><tbody>';
+  rows.forEach(function(row){
+    var newDs = row.distances.slice(newOff).filter(function(d){ return d!==null; });
+    var minNew = newDs.length ? Math.min.apply(null, newDs) : null;
+    tbl += '<tr'+(row.failed?' style="opacity:.55"':'')+'>'+
+      '<td class="idc">'+row.id+(row.failed?' <span style="color:var(--danger);font-size:10px">⚠</span>':'')+'</td>';
+    row.distances.forEach(function(d, i){
+      if (d === null) { tbl += '<td class="cna">—</td>'; return; }
+      var isNew = i >= newOff;
+      var near = d < 50;
+      var best = isNew && d === minNew;
+      tbl += '<td class="'+(near?'cn ':'')+' '+(best?'cb':'')+'">'+d.toFixed(1)+'</td>';
+    });
+    tbl += '</tr>';
+  });
+  tbl += '</tbody></table>';
+  document.getElementById('mwrap').innerHTML = tbl;
+
+  // CAPACITY
+  buildCapacity(rows, newCols, newOff, total, dests);
+}
+
+function buildTop3(rows, newCols, newOff, total, hasCD) {
+  if (!newCols.length) { document.getElementById('top3').innerHTML = ''; return; }
+  var scores = newCols.map(function(col, ni){
+    var ci = newOff + ni;
+    var u50=0, posImp=0, miSaved=0;
+    rows.forEach(function(row){
+      var nd = row.distances[ci];
+      if (nd === null) return;
+      if (nd < 50) u50++;
+      if (hasCD && row.distances[0] !== null) {
+        var diff = row.distances[0] - nd;
+        if (diff > 0) { posImp++; miSaved += diff; }
+      }
+    });
+    return {
+      label: col.label,
+      u50: u50,
+      u50Pct: total > 0 ? ((u50/total)*100).toFixed(1) : 0,
+      posImp: posImp,
+      avgSaved: posImp > 0 ? (miSaved/posImp).toFixed(1) : '—'
+    };
+  });
+  scores.sort(function(a,b){ return b.u50-a.u50 || b.posImp-a.posImp; });
+  var top = scores.slice(0,3);
+  var medals = ['🥇','🥈','🥉'], ranks = ['r1','r2','r3'];
+  var html = '<div class="t3panel"><div class="t3title">⚡ Top '+top.length+' New Location'+(top.length>1?'s':'')+' — Commute Impact Ranking</div><div class="t3list">';
+  top.forEach(function(s, i){
+    var impStr = '';
+    if (hasCD && s.posImp > 0) {
+      impStr = ' &nbsp;·&nbsp; <strong style="color:var(--accent2)">'+s.posImp+'</strong> employees improve vs. current office (avg <strong style="color:var(--text)">'+s.avgSaved+' mi</strong> saved)';
+    }
+    html += '<div class="t3item">'+
+      '<div class="t3rank '+ranks[i]+'">'+medals[i]+'</div>'+
+      '<div style="flex:1"><div class="t3lbl">'+s.label+'</div>'+
+      '<div class="t3det"><strong style="color:var(--accent)">'+s.u50+'</strong> of '+total+' employees ('+s.u50Pct+'%) would have a ≤50 mi commute'+impStr+'</div></div>'+
+      '<div class="t3badge">'+s.u50Pct+'% ≤50 mi</div>'+
+    '</div>';
+  });
+  html += '</div></div>';
+  document.getElementById('top3').innerHTML = html;
+}
+
+function buildCapacity(rows, newCols, newOff, total, dests) {
+  if (!newCols.length) { document.getElementById('capsec').innerHTML = '<p class="tmuted">No new locations.</p>'; return; }
+  var capMap = {};
+  if (dests) dests.forEach(function(d){ capMap[d.label] = d.capacity ? parseInt(d.capacity) : null; });
+
+  var assign = {};
+  newCols.forEach(function(c){ assign[c.label] = []; });
+  rows.forEach(function(row){
+    var bestIdx=-1, bestDist=Infinity;
+    newCols.forEach(function(_, ni){
+      var d = row.distances[newOff+ni];
+      if (d !== null && d < bestDist) { bestDist = d; bestIdx = ni; }
+    });
+    if (bestIdx !== -1) assign[newCols[bestIdx].label].push({id:row.id, dist:bestDist});
+  });
+
+  var sorted = Object.entries(assign).sort(function(a,b){ return b[1].length - a[1].length; });
+  var maxCnt = sorted.length ? sorted[0][1].length : 1;
+  var medals = ['🥇','🥈','🥉'];
+  var hasCap = dests && dests.some(function(d){ return d.capacity; });
+
+  var unassigned = rows.filter(function(r){
+    return newCols.every(function(_, ni){ return r.distances[newOff+ni] === null; });
+  }).length;
+
+  var html = '';
+  if (unassigned > 0) html += '<p style="color:var(--warn);font-family:var(--mono);font-size:12px;margin-bottom:10px">⚠ '+unassigned+' employee(s) could not be assigned — missing distance data.</p>';
+  html += '<table class="ctable"><thead><tr>'+
+    '<th>Rank</th><th>Location</th><th>Assigned</th><th>% Total</th>'+
+    '<th>Avg Commute</th><th>Min Commute</th><th>Max Commute</th><th>≤50 mi</th>'+
+    (hasCap ? '<th>Capacity</th><th>Utilization</th>' : '')+
+    '</tr></thead><tbody>';
+
+  sorted.forEach(function(entry, i){
+    var label = entry[0], emps = entry[1];
+    var cnt = emps.length;
+    var pct = total > 0 ? ((cnt/total)*100).toFixed(1) : 0;
+    var dists = emps.map(function(e){ return e.dist; });
+    var avg = cnt > 0 ? (dists.reduce(function(a,b){return a+b;},0)/cnt).toFixed(1) : '—';
+    var minD = cnt > 0 ? Math.min.apply(null,dists).toFixed(1) : '—';
+    var maxD = cnt > 0 ? Math.max.apply(null,dists).toFixed(1) : '—';
+    var near = emps.filter(function(e){ return e.dist < 50; }).length;
+    var nearPct = cnt > 0 ? Math.round((near/cnt)*100) : 0;
+    var bw = Math.round((cnt/maxCnt)*100);
+
+    var capCell = '', utilCell = '';
+    if (hasCap) {
+      var cap = capMap[label];
+      capCell = '<td style="font-family:var(--mono)">'+(cap ? cap.toLocaleString() : '—')+'</td>';
+      if (cap) {
+        var up = Math.round((cnt/cap)*100);
+        var bc = up >= 100 ? 'ov' : up >= 80 ? 'wn' : '';
+        var bkg = up >= 100 ? 'cbadge-ov' : up >= 80 ? 'cbadge-wn' : 'cbadge-ok';
+        var lbl = up >= 100 ? ' ⚠ OVER' : up >= 80 ? ' ⚠ NEAR' : '';
+        utilCell = '<td><span class="cbadge '+bkg+'">'+up+'%'+lbl+'</span>'+
+          '<div class="cbar-w" style="display:block;margin-top:4px"><div class="cbar '+bc+'" style="width:'+Math.min(up,100)+'%"></div></div></td>';
+      } else utilCell = '<td style="color:var(--muted);font-size:11px;font-family:var(--mono)">—</td>';
+    }
+
+    html += '<tr>'+
+      '<td style="font-family:var(--mono);color:var(--muted)">'+(i<3?medals[i]:'#'+(i+1))+'</td>'+
+      '<td style="font-weight:600;color:var(--text)">'+label+'</td>'+
+      '<td><span style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--accent)">'+cnt+'</span>'+
+        '<span class="cbar-w"><span class="cbar" style="width:'+bw+'%"></span></span></td>'+
+      '<td style="font-family:var(--mono)">'+pct+'%</td>'+
+      '<td style="font-family:var(--mono)">'+avg+' mi</td>'+
+      '<td style="font-family:var(--mono);color:var(--accent)">'+minD+' mi</td>'+
+      '<td style="font-family:var(--mono);color:var(--muted)">'+maxD+' mi</td>'+
+      '<td style="font-family:var(--mono);color:'+(near>0?'var(--accent)':'var(--muted)')+'">'+near+' ('+nearPct+'%)</td>'+
+      capCell+utilCell+
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('capsec').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────────
+function exportXlsx() {
+  if (!resultsData) return;
+  var columns = resultsData.columns, rows = resultsData.rows, hasCD = resultsData.hasCD, dests = resultsData.dests;
+  var wb = XLSX.utils.book_new();
+
+  // Matrix sheet
+  var hdrs = ['Employee ID'].concat(columns.map(function(c){ return c.label; }));
+  var mrows = rows.map(function(r){ return [r.id].concat(r.distances.map(function(d){ return d !== null ? d : ''; })); });
+  var ws1 = XLSX.utils.aoa_to_sheet([hdrs].concat(mrows));
+  ws1['!cols'] = hdrs.map(function(){ return {wch:22}; });
+  XLSX.utils.book_append_sheet(wb, ws1, 'Distance Matrix');
+
+  // Capacity sheet
+  var newCols = columns.filter(function(c){ return c.type==='new'; });
+  var newOff = hasCD ? 1 : 0;
+  var assign = {};
+  newCols.forEach(function(c){ assign[c.label]=[]; });
+  rows.forEach(function(row){
+    var bIdx=-1, bDist=Infinity;
+    newCols.forEach(function(_,ni){ var d=row.distances[newOff+ni]; if(d!==null&&d<bDist){bDist=d;bIdx=ni;} });
+    if (bIdx!==-1) assign[newCols[bIdx].label].push(row.id);
+  });
+  var capRows = [['Location Label','Assigned Employees','% of Total']].concat(
+    Object.entries(assign).sort(function(a,b){return b[1].length-a[1].length;}).map(function(e){
+      return [e[0], e[1].length, rows.length ? ((e[1].length/rows.length)*100).toFixed(1)+'%' : '0%'];
+    })
+  );
+  var ws2 = XLSX.utils.aoa_to_sheet(capRows);
+  ws2['!cols'] = [{wch:28},{wch:20},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Capacity Allocation');
+
+  // Summary sheet
+  var t = rows.length, w = rows.filter(function(r){ return r.distances.some(function(d){ return d!==null&&d<50; }); }).length;
+  var ws3 = XLSX.utils.aoa_to_sheet([
+    ['Metric','Value'],
+    ['Total Employees', t],
+    ['Employees Within 50 Miles (any)', w],
+    ['Percent', t ? ((w/t)*100).toFixed(1)+'%' : '0%'],
+    ['Unresolved Addresses', resultsData.failedEmps]
+  ]);
+  ws3['!cols'] = [{wch:34},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Summary');
+
+  XLSX.writeFile(wb, 'DistanceIQ_Results.xlsx');
+  toast('Results exported!', 'suc');
+}
+
+// ─────────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────────
+function resetAll() {
+  empData=[]; newLocs=[]; zipRef=new Map(); resultsData=null; dCnt=0;
+  ['emp-loaded','emp-preview','zip-loaded','dest-loaded','dest-preview'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.innerHTML='';
+  });
+  ['emp-err','zip-err','dest-err'].forEach(function(id){ clearErr(id); });
+  document.getElementById('btn-step2-next').disabled = true;
+  ['fi-emp','fi-zip','fi-dest'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value='';
+  });
+  [1,2,3,4].forEach(function(n){
+    document.getElementById('tab-'+n).classList.remove('done');
+    document.getElementById('snum-'+n).textContent = n;
+  });
+  setMode('upload');
+  initDests();
+  goTo(1);
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function fc(headers, aliases) {
+  for (var i=0; i<aliases.length; i++) {
+    var idx = headers.findIndex(function(h){ return h.toLowerCase().includes(aliases[i].toLowerCase()); });
+    if (idx !== -1) return idx;
+  }
+  return -1;
+}
+function s(v) { return String(v||'').trim(); }
+function setErr(id, msg) { var el=document.getElementById(id); if(el) el.textContent=msg; }
+function clearErr(id) { var el=document.getElementById(id); if(el) el.textContent=''; }
+function showLoaded(id, name, sub) {
+  var el = document.getElementById(id); if (!el) return;
+  el.innerHTML = '<div class="floaded"><div style="font-size:20px">✅</div>' +
+    '<div><div class="floaded-name">'+name+'</div><div class="floaded-sub">'+sub+'</div></div></div>';
+}
+function readXlsx(file, cb) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
+      cb(rows, null);
+    } catch(err) { cb(null, 'Read error: '+err.message); }
+  };
+  reader.onerror = function(){ cb(null,'File read failed.'); };
+  reader.readAsArrayBuffer(file);
+}
+function toast(msg, type) {
+  var c = document.getElementById('tcon');
+  var t = document.createElement('div');
+  t.className = 'tst ' + (type||''); t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 4500);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+initDests();
+</script>
+</body>
+</html>
