@@ -53,6 +53,8 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .btn-s:hover{border-color:var(--accent);color:var(--accent)}
 .btn-g{color:var(--accent2);border-color:rgba(0,153,255,.3)}
 .btn-g:hover{background:rgba(0,153,255,.08)}
+.btn-w{color:#7c6f3e;border-color:rgba(245,158,11,.35)}
+.btn-w:hover{background:rgba(245,158,11,.08);color:var(--warn)}
 .btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
 
 /* TEMPLATE BOXES */
@@ -85,27 +87,8 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .ptable tr:hover td{background:var(--surface2)}
 .pcnt{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:7px}
 
-/* DEST MODE TOGGLE */
-.mode-tog{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
-.mbtn{flex:1;padding:11px 18px;background:var(--surface2);border:none;color:var(--muted);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
-.mbtn:last-child{border-right:none}
-.mbtn.active{background:var(--accent);color:var(--bg);font-weight:600}
-
-/* MANUAL DEST FORM */
-.dlist{display:flex;flex-direction:column;gap:12px}
-.ditem{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px 18px}
-.ditem-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.ditem-num{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
-.ditem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:3px;transition:color .15s}
-.ditem-rm:hover{color:var(--danger)}
-.frow{display:grid;grid-template-columns:160px 2fr 1.5fr 60px 100px;gap:10px}
-.fg{display:flex;flex-direction:column;gap:4px}
-.flbl{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
-.finp{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 11px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s}
-.finp:focus{border-color:var(--accent)}
-.finp::placeholder{color:var(--muted)}
-.add-dbtn{margin-top:10px;width:100%;padding:11px;background:transparent;border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:13px;cursor:pointer;transition:all .2s}
-.add-dbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,170,.04)}
+/* UPLOAD SECTION DIVIDER */
+.upload-divider{border:none;border-top:1px solid var(--border);margin:28px 0}
 
 /* ACTION BAR */
 .abar{display:flex;align-items:center;gap:12px;padding:18px 0;border-top:1px solid var(--border);margin-top:20px}
@@ -119,7 +102,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .sval{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--text);line-height:1}
 .sval.ac{color:var(--accent)}
 .sval.dg{color:var(--danger)}
-.ssub{font-size:11px;color:var(--muted);margin-top:5px}
+.ssub2{font-size:11px;color:var(--muted);margin-top:5px}
 
 /* TOP 3 */
 .t3panel{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:22px;margin-bottom:6px}
@@ -132,15 +115,25 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .t3det{font-size:13px;color:var(--muted)}
 .t3badge{margin-left:auto;font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:4px;white-space:nowrap;align-self:center;background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
 
+/* WIN/LOSS PILLS */
+.wl-row{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+.wl-pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px}
+.wl-win{background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
+.wl-loss{background:rgba(239,68,68,.13);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.wl-tie{background:var(--border);color:var(--muted)}
+
 /* MATRIX */
 .mwrap{overflow:auto;border:1px solid var(--border);border-radius:6px;max-height:580px}
 .mtable{border-collapse:collapse;font-family:var(--mono);font-size:12px;min-width:100%}
-.mtable th{position:sticky;top:0;background:var(--surface2);z-index:10;padding:11px 15px;border-bottom:2px solid var(--border2);border-right:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;white-space:nowrap;min-width:130px}
+.mtable th{position:sticky;top:0;background:var(--surface2);z-index:10;padding:11px 15px;border-bottom:2px solid var(--border2);border-right:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;white-space:nowrap;min-width:140px}
 .mtable th.idc{text-align:left;position:sticky;left:0;z-index:20;min-width:160px;color:var(--text)}
-.mtable td{padding:9px 15px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap}
+.mtable th.cur-th{background:var(--surface);opacity:.8}
+.mtable td{padding:9px 15px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;white-space:nowrap;vertical-align:middle}
 .mtable td.idc{position:sticky;left:0;background:var(--surface);z-index:5;text-align:left;color:var(--text);font-weight:500;border-right:2px solid var(--border2)}
+.mtable td.cur-td{color:var(--muted)}
 .mtable tr:hover td{background:var(--surface2)}
 .mtable tr:hover td.idc{background:var(--surface2)}
+.mtable tr:hover td.cur-td{background:var(--surface2);color:var(--muted)}
 .cn{background:rgba(0,212,170,.12)!important;color:var(--accent);font-weight:600}
 .mtable tr:hover td.cn{background:rgba(0,212,170,.2)!important}
 .cb{position:relative}
@@ -149,8 +142,11 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .dhl{display:block;font-size:10px;color:var(--muted);margin-bottom:2px}
 .dhn{color:var(--text);font-weight:600;font-size:12px}
 .dht{font-size:10px;padding:1px 6px;border-radius:2px;margin-top:3px;display:inline-block}
-.tcu{background:rgba(0,153,255,.15);color:var(--accent2)}
+.tcu{background:rgba(0,153,255,.1);color:var(--muted)}
 .tnw{background:rgba(0,212,170,.15);color:var(--accent)}
+.delta-dn{display:block;font-size:10px;color:#00d4aa;line-height:1.2;margin-top:2px}
+.delta-up{display:block;font-size:10px;color:#ef4444;line-height:1.2;margin-top:2px}
+.delta-eq{display:block;font-size:10px;color:var(--muted);line-height:1.2;margin-top:2px}
 
 /* CAPACITY TABLE */
 .ctable{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px}
@@ -168,8 +164,9 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .cbadge-ov{background:rgba(239,68,68,.15);color:var(--danger);font-weight:600}
 
 /* TOOLBAR / LEGEND */
-.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.legend{display:flex;align-items:center;gap:18px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.export-btns{display:flex;gap:8px;flex-wrap:wrap}
+.legend{display:flex;align-items:center;gap:18px;font-size:12px;color:var(--muted);font-family:var(--mono);flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:7px}
 .lsw{width:15px;height:15px;border-radius:3px}
 .lsw-n{background:rgba(0,212,170,.2);border:1px solid var(--accent)}
@@ -202,7 +199,6 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 @media(max-width:900px){
   .wrap{padding:20px}
   .sgrid{grid-template-columns:1fr}
-  .frow{grid-template-columns:1fr 1fr}
   header{padding:0 20px}
 }
 </style>
@@ -224,14 +220,10 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     </div>
     <div class="step-tab" id="tab-2" onclick="goTo(2)">
       <div class="snum" id="snum-2">2</div>
-      <div><div class="slabel">Employee Data</div><div class="ssub">Home &amp; Office</div></div>
+      <div><div class="slabel">Upload Data</div><div class="ssub">Employees &amp; Locations</div></div>
     </div>
     <div class="step-tab" id="tab-3" onclick="goTo(3)">
       <div class="snum" id="snum-3">3</div>
-      <div><div class="slabel">New Locations</div><div class="ssub">Upload or Enter</div></div>
-    </div>
-    <div class="step-tab" id="tab-4" onclick="goTo(4)">
-      <div class="snum" id="snum-4">4</div>
       <div><div class="slabel">Results</div><div class="ssub">Commute Analysis</div></div>
     </div>
   </div>
@@ -244,7 +236,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
       <div class="tbox">
         <div class="tdesc">
           <strong>Employee Template</strong>
-          One row per employee. Origin = home address. Current Destination = current office (optional, enables commute comparison).
+          One row per employee. Origin = home address. Current Destination = current office (enables commute comparison and change indicators).
           <div class="pills">
             <span class="pill">Unique Identifier</span><span class="pill">Origin Street</span><span class="pill">Origin City</span>
             <span class="pill">Origin State</span><span class="pill">Origin Zip</span><span class="pill">Current Destination Street</span>
@@ -282,11 +274,12 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     </div>
   </div>
 
-  <!-- ===== STEP 2: EMPLOYEE + ZIP UPLOAD ===== -->
+  <!-- ===== STEP 2: ALL DATA UPLOADS ===== -->
   <div class="section" id="sec-2">
+
     <div class="panel">
-      <div class="ptitle">// Step 2 — Upload Employee Data</div>
-      <p class="tmuted mt1" style="margin-bottom:16px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office. USA addresses only.</p>
+      <div class="ptitle">// Employee Data</div>
+      <p class="tmuted mt1" style="margin-bottom:16px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office (enables change indicators in results).</p>
       <div class="uzone" id="uz-emp">
         <input type="file" accept=".xlsx,.xls,.csv" id="fi-emp" onchange="onEmpFile(this.files[0])">
         <div class="uico">👥</div>
@@ -296,6 +289,20 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
       <div id="emp-loaded"></div>
       <div id="emp-preview"></div>
       <div id="emp-err" class="verr"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">// New Office Locations</div>
+      <p class="tmuted mt1" style="margin-bottom:16px">One row per potential office location. Each needs a <strong style="color:var(--text)">Label</strong> (e.g. "Downtown HQ") — it will appear across all results.</p>
+      <div class="uzone" id="uz-dest">
+        <input type="file" accept=".xlsx,.xls,.csv" id="fi-dest" onchange="onDestFile(this.files[0])">
+        <div class="uico">🏢</div>
+        <div class="ulbl">Drop locations file here or click to browse</div>
+        <div class="usub">Use the Locations Template from Step 1 &nbsp;·&nbsp; Accepts .xlsx, .xls, .csv</div>
+      </div>
+      <div id="dest-loaded"></div>
+      <div id="dest-preview"></div>
+      <div id="dest-err" class="verr mt2"></div>
     </div>
 
     <div class="panel">
@@ -313,47 +320,13 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 
     <div class="abar">
       <button class="btn btn-s" onclick="goTo(1)">← Back</button>
-      <button class="btn btn-p" id="btn-step2-next" disabled onclick="goTo(3)">Continue to New Locations →</button>
+      <button class="btn btn-p" id="btn-calc" disabled onclick="runCalc()">Calculate Commute Distances →</button>
     </div>
   </div>
 
-  <!-- ===== STEP 3: NEW LOCATIONS ===== -->
+  <!-- ===== STEP 3: RESULTS ===== -->
   <div class="section" id="sec-3">
-    <div class="panel">
-      <div class="ptitle">// Step 3 — Potential New Office Locations</div>
-      <p class="tmuted mt1" style="margin-bottom:16px">Add the office locations being considered. Each needs a <strong style="color:var(--text)">Label</strong> (e.g. "Downtown HQ") — it will appear across all results.</p>
 
-      <div class="mode-tog">
-        <button class="mbtn active" id="mb-upload" onclick="setMode('upload')">📂 Upload File</button>
-        <button class="mbtn" id="mb-manual" onclick="setMode('manual')">✏️ Enter Manually</button>
-      </div>
-
-      <div id="loc-upload">
-        <div class="uzone" id="uz-dest">
-          <input type="file" accept=".xlsx,.xls,.csv" id="fi-dest" onchange="onDestFile(this.files[0])">
-          <div class="uico">🏢</div>
-          <div class="ulbl">Drop locations file here or click to browse</div>
-          <div class="usub">Use the Locations Template from Step 1</div>
-        </div>
-        <div id="dest-loaded"></div>
-        <div id="dest-preview"></div>
-      </div>
-
-      <div id="loc-manual" style="display:none">
-        <div class="dlist" id="dlist"></div>
-        <button class="add-dbtn" onclick="addDest()">+ Add Another Location</button>
-      </div>
-
-      <div id="dest-err" class="verr mt2"></div>
-    </div>
-    <div class="abar">
-      <button class="btn btn-s" onclick="goTo(2)">← Back</button>
-      <button class="btn btn-p" onclick="runCalc()">Calculate Commute Distances →</button>
-    </div>
-  </div>
-
-  <!-- ===== STEP 4: RESULTS ===== -->
-  <div class="section" id="sec-4">
     <div class="panel">
       <div class="ptitle">// Summary</div>
       <div class="sgrid" id="sgrid"></div>
@@ -363,11 +336,16 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     <div class="panel">
       <div class="ptitle">// Commute Distance Matrix <span style="font-weight:300;color:var(--muted);font-size:10px;margin-left:8px">(straight-line miles, one-way)</span></div>
       <div class="toolbar">
-        <div class="legend">
+        <div class="legend" id="matrix-legend">
           <div class="li"><div class="lsw lsw-n"></div>Under 50 mi</div>
           <div class="li"><div class="lsw lsw-b"></div>Shortest (new locations)</div>
+          <div class="li" id="leg-dn" style="display:none"><span style="color:#00d4aa;font-size:13px">↓</span> Shorter than current</div>
+          <div class="li" id="leg-up" style="display:none"><span style="color:#ef4444;font-size:13px">↑</span> Longer than current</div>
         </div>
-        <button class="btn btn-g" onclick="exportXlsx()">⬇ Export Results (.xlsx)</button>
+        <div class="export-btns">
+          <button class="btn btn-w" onclick="exportWord()">⬇ Summary (.doc)</button>
+          <button class="btn btn-g" onclick="exportXlsx()">⬇ Export Results (.xlsx)</button>
+        </div>
       </div>
       <div class="mwrap" id="mwrap"></div>
     </div>
@@ -379,7 +357,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     </div>
 
     <div class="abar">
-      <button class="btn btn-s" onclick="goTo(3)">← Modify Locations</button>
+      <button class="btn btn-s" onclick="goTo(2)">← Modify Data</button>
       <button class="btn btn-g" onclick="resetAll()">↺ Start Over</button>
     </div>
   </div>
@@ -400,12 +378,12 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 // ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
-var empData     = [];   // employee rows
-var newLocs     = [];   // new location rows {label,street,city,state,zip,capacity}
-var zipRef      = new Map(); // zip5 -> {lat,lon}
+var empData     = [];
+var newLocs     = [];
+var zipRef      = new Map();
 var resultsData = null;
-var destMode    = 'upload';
-var dCnt        = 0;
+var empReady    = false;
+var locReady    = false;
 
 // ─────────────────────────────────────────────
 // NAVIGATION
@@ -419,6 +397,9 @@ function goTo(n) {
 function markDone(n) {
   document.getElementById('snum-'+n).textContent = '✓';
   document.getElementById('tab-'+n).classList.add('done');
+}
+function checkReady() {
+  document.getElementById('btn-calc').disabled = !(empReady && locReady);
 }
 
 // ─────────────────────────────────────────────
@@ -519,8 +500,8 @@ function onEmpFile(file) {
     clearErr('emp-err');
     showLoaded('emp-loaded', file.name, empData.length + ' employees loaded');
     showEmpPreview();
-    document.getElementById('btn-step2-next').disabled = false;
-    markDone(2);
+    empReady = true;
+    checkReady();
   });
 }
 
@@ -562,7 +543,6 @@ function onZipFile(file) {
     var loaded = 0;
     for (var i = 1; i < rows.length; i++) {
       var row = rows[i];
-      // Normalize ZIP: handle numeric (15222.0 -> "15222")
       var rawZip = String(row[zipCol]||'').trim().split('.')[0].replace(/\D/g,'');
       if (!rawZip) continue;
       var z5 = rawZip.substring(0,5).padStart(5,'0');
@@ -574,18 +554,6 @@ function onZipFile(file) {
     clearErr('zip-err');
     showLoaded('zip-loaded', file.name, loaded.toLocaleString() + ' ZIP codes loaded as fallback');
   });
-}
-
-// ─────────────────────────────────────────────
-// DESTINATION MODE
-// ─────────────────────────────────────────────
-function setMode(mode) {
-  destMode = mode;
-  document.getElementById('mb-upload').classList.toggle('active', mode === 'upload');
-  document.getElementById('mb-manual').classList.toggle('active', mode === 'manual');
-  document.getElementById('loc-upload').style.display = mode === 'upload' ? '' : 'none';
-  document.getElementById('loc-manual').style.display = mode === 'manual' ? '' : 'none';
-  clearErr('dest-err');
 }
 
 // ─────────────────────────────────────────────
@@ -623,7 +591,8 @@ function onDestFile(file) {
     clearErr('dest-err');
     showLoaded('dest-loaded', file.name, newLocs.length + ' locations loaded');
     showDestPreview();
-    markDone(3);
+    locReady = true;
+    checkReady();
   });
 }
 
@@ -640,51 +609,6 @@ function showDestPreview() {
 }
 
 // ─────────────────────────────────────────────
-// MANUAL DESTINATIONS
-// ─────────────────────────────────────────────
-function initDests() {
-  document.getElementById('dlist').innerHTML = '';
-  dCnt = 0;
-  addDest();
-}
-
-function addDest() {
-  dCnt++;
-  var id = dCnt;
-  var el = document.createElement('div');
-  el.className = 'ditem'; el.id = 'di-'+id;
-  el.innerHTML =
-    '<div class="ditem-hdr">' +
-      '<div class="ditem-num">// Location '+id+'</div>' +
-      (id > 1 ? '<button class="ditem-rm" onclick="rmDest('+id+')">✕</button>' : '') +
-    '</div>' +
-    '<div class="frow">' +
-      '<div class="fg"><label class="flbl">Label / Name</label><input class="finp" placeholder="Downtown HQ" data-f="label"></div>' +
-      '<div class="fg"><label class="flbl">Street Address</label><input class="finp" placeholder="500 Grant St" data-f="street"></div>' +
-      '<div class="fg"><label class="flbl">City</label><input class="finp" placeholder="Pittsburgh" data-f="city"></div>' +
-      '<div class="fg"><label class="flbl">State</label><input class="finp" placeholder="PA" maxlength="2" data-f="state"></div>' +
-      '<div class="fg"><label class="flbl">ZIP</label><input class="finp" placeholder="15219" maxlength="10" data-f="zip"></div>' +
-    '</div>';
-  document.getElementById('dlist').appendChild(el);
-}
-
-function rmDest(id) {
-  var el = document.getElementById('di-'+id);
-  if (el) el.remove();
-}
-
-function getManualDests() {
-  var out = [];
-  document.querySelectorAll('.ditem').forEach(function(item){
-    function g(f){ var el = item.querySelector('[data-f="'+f+'"]'); return el ? el.value.trim() : ''; }
-    if (g('street') && g('city')) {
-      out.push({ label: g('label') || g('city'), street: g('street'), city: g('city'), state: g('state'), zip: g('zip'), capacity: null });
-    }
-  });
-  return out;
-}
-
-// ─────────────────────────────────────────────
 // GEOCODING
 // ─────────────────────────────────────────────
 function haversine(lat1, lon1, lat2, lon2) {
@@ -697,7 +621,6 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 function normZip(zip) {
-  // Split on '.' first to handle Excel numeric ZIPs like 15222.0
   return String(zip||'').trim().split('.')[0].replace(/\D/g,'').substring(0,5).padStart(5,'0');
 }
 
@@ -726,7 +649,7 @@ async function geocode(street, city, state, zip) {
     } catch(e) {}
   }
 
-  // Tier 3: Census with generic street (city-level approximation)
+  // Tier 3: Census with generic street
   var attempts = [
     {street:'1 Main St', city:city, state:state, zip:z5},
     {street:'1 Main St', city:city, state:state, zip:''}
@@ -750,7 +673,7 @@ async function geocode(street, city, state, zip) {
     if (zc) return {lat:zc.lat, lon:zc.lon};
   }
 
-  // Tier 4b: Small embedded table for most common ZIPs
+  // Tier 4b: Embedded ZIP table
   var zc2 = ZIPT.get(z5);
   if (zc2) return {lat:zc2[0], lon:zc2[1]};
 
@@ -864,13 +787,8 @@ function setProgress(pct, msg) {
 
 async function runCalc() {
   clearErr('dest-err');
-  var dests = destMode === 'upload' ? newLocs : getManualDests();
-  if (!dests.length) {
-    setErr('dest-err', destMode === 'upload'
-      ? 'Please upload a locations file first.'
-      : 'Enter at least one location (label, street and city required).');
-    return;
-  }
+  if (!newLocs.length) { setErr('dest-err','Please upload a locations file first.'); return; }
+  if (!empData.length) { setErr('emp-err','Please upload an employee file first.'); return; }
 
   document.getElementById('lov').classList.add('on');
   setProgress(0, 'Preparing...');
@@ -888,7 +806,7 @@ async function runCalc() {
 
     empData.forEach(function(r){ enq(r.oStreet, r.oCity, r.oState, r.oZip); });
     empData.forEach(function(r){ if (r.dStreet && r.dCity) enq(r.dStreet, r.dCity, r.dState, r.dZip); });
-    dests.forEach(function(d){ enq(d.street, d.city, d.state, d.zip); });
+    newLocs.forEach(function(d){ enq(d.street, d.city, d.state, d.zip); });
 
     var total = toGeo.length;
     var failCount = 0;
@@ -906,7 +824,7 @@ async function runCalc() {
     var hasCD = empData.some(function(r){ return r.dStreet && r.dCity; });
     var columns = [];
     if (hasCD) columns.push({label:'Current Office', type:'current'});
-    dests.forEach(function(d){ columns.push({label:d.label, type:'new'}); });
+    newLocs.forEach(function(d){ columns.push({label:d.label, type:'new'}); });
 
     var rows = [];
     var failedEmps = 0;
@@ -922,7 +840,7 @@ async function runCalc() {
           distances.push((oc && dc) ? Math.round(haversine(oc.lat, oc.lon, dc.lat, dc.lon)*10)/10 : null);
         } else distances.push(null);
       }
-      dests.forEach(function(d){
+      newLocs.forEach(function(d){
         var dk2 = ak(d.street, d.city, d.state, d.zip);
         var dc2 = addrMap.get(dk2);
         distances.push((oc && dc2) ? Math.round(haversine(oc.lat, oc.lon, dc2.lat, dc2.lon)*10)/10 : null);
@@ -936,10 +854,10 @@ async function runCalc() {
 
     if (failCount > 0) toast(failCount + ' address(es) could not be located — shown as "—"', 'err');
 
-    resultsData = {columns:columns, rows:rows, hasCD:hasCD, dests:dests, failedEmps:failedEmps};
-    markDone(3);
+    resultsData = {columns:columns, rows:rows, hasCD:hasCD, dests:newLocs, failedEmps:failedEmps};
+    markDone(2);
     buildResults(resultsData);
-    goTo(4);
+    goTo(3);
 
   } catch(err) {
     document.getElementById('lov').classList.remove('on');
@@ -957,16 +875,36 @@ function buildResults(rd) {
   var newOff = hasCD ? 1 : 0;
   var newCols = columns.filter(function(c){ return c.type === 'new'; });
 
+  // Show/hide delta legend items
+  document.getElementById('leg-dn').style.display = hasCD ? '' : 'none';
+  document.getElementById('leg-up').style.display = hasCD ? '' : 'none';
+
   // SUMMARY
   var w50 = rows.filter(function(r){ return r.distances.some(function(d){ return d !== null && d < 50; }); }).length;
   var pct50 = total > 0 ? ((w50/total)*100).toFixed(1) : 0;
+
+  var improveCard = '';
+  if (hasCD) {
+    var improveCount = rows.filter(function(r){
+      var cur = r.distances[0];
+      if (cur === null) return false;
+      return newCols.some(function(_, ni){
+        var nd = r.distances[newOff+ni];
+        return nd !== null && nd < cur;
+      });
+    }).length;
+    var impPct = total > 0 ? ((improveCount/total)*100).toFixed(1) : 0;
+    improveCard = '<div class="scard hi"><div class="slb">Commute Improves</div><div class="sval ac">'+improveCount+'</div><div class="ssub2">'+impPct+'% would commute less at ≥1 new location</div></div>';
+  }
+
   var failCard = failedEmps > 0
-    ? '<div class="scard al"><div class="slb">⚠ Unresolved Addresses</div><div class="sval dg">'+failedEmps+'</div><div class="ssub">Employee home address(es) could not be geocoded — shown as "—". Upload a ZIP reference file (Step 2) to improve coverage.</div></div>'
+    ? '<div class="scard al"><div class="slb">⚠ Unresolved Addresses</div><div class="sval dg">'+failedEmps+'</div><div class="ssub2">Could not be geocoded — shown as "—". Upload a ZIP reference file to improve coverage.</div></div>'
     : '';
+
   document.getElementById('sgrid').innerHTML =
-    '<div class="scard"><div class="slb">Total Employees</div><div class="sval">'+total+'</div><div class="ssub">Unique records analyzed</div></div>' +
-    '<div class="scard hi"><div class="slb">Within 50 Miles</div><div class="sval ac">'+w50+'</div><div class="ssub">'+pct50+'% have ≥1 location within reasonable commute</div></div>' +
-    failCard;
+    '<div class="scard"><div class="slb">Total Employees</div><div class="sval">'+total+'</div><div class="ssub2">Unique records analyzed</div></div>' +
+    (hasCD ? improveCard : '<div class="scard hi"><div class="slb">Within 50 Miles</div><div class="sval ac">'+w50+'</div><div class="ssub2">'+pct50+'% have ≥1 location within reasonable commute</div></div>') +
+    (failCard || (!hasCD ? '' : '<div class="scard"><div class="slb">Within 50 Miles</div><div class="sval">'+w50+'</div><div class="ssub2">'+pct50+'% have ≥1 location within 50 mi</div></div>'));
 
   // TOP 3
   buildTop3(rows, newCols, newOff, total, hasCD);
@@ -974,22 +912,48 @@ function buildResults(rd) {
   // MATRIX
   var tbl = '<table class="mtable"><thead><tr><th class="idc">Employee ID</th>';
   columns.forEach(function(c){
-    tbl += '<th><span class="dhl">'+(c.type==='current'?'Current Office':'New Location')+'</span>' +
-      '<span class="dhn">'+(c.label.length>28?c.label.substring(0,26)+'…':c.label)+'</span>' +
-      '<br><span class="dht '+(c.type==='current'?'tcu':'tnw')+'">'+(c.type==='current'?'Current':'New')+'</span></th>';
+    if (c.type === 'current') {
+      tbl += '<th class="cur-th"><span class="dhl">Reference Only</span><span class="dhn">Current Office</span><br><span class="dht tcu">Current</span></th>';
+    } else {
+      tbl += '<th><span class="dhl">New Location</span><span class="dhn">'+(c.label.length>26?c.label.substring(0,24)+'…':c.label)+'</span><br><span class="dht tnw">New</span></th>';
+    }
   });
   tbl += '</tr></thead><tbody>';
+
   rows.forEach(function(row){
     var newDs = row.distances.slice(newOff).filter(function(d){ return d!==null; });
     var minNew = newDs.length ? Math.min.apply(null, newDs) : null;
+    var curDist = (hasCD && row.distances[0] !== null) ? row.distances[0] : null;
+
     tbl += '<tr'+(row.failed?' style="opacity:.55"':'')+'>'+
       '<td class="idc">'+row.id+(row.failed?' <span style="color:var(--danger);font-size:10px">⚠</span>':'')+'</td>';
+
     row.distances.forEach(function(d, i){
       if (d === null) { tbl += '<td class="cna">—</td>'; return; }
-      var isNew = i >= newOff;
+
+      // Current Office column — plain, no highlights
+      if (i === 0 && hasCD) {
+        tbl += '<td class="cur-td">'+d.toFixed(1)+'</td>';
+        return;
+      }
+
       var near = d < 50;
-      var best = isNew && d === minNew;
-      tbl += '<td class="'+(near?'cn ':'')+' '+(best?'cb':'')+'">'+d.toFixed(1)+'</td>';
+      var best = d === minNew;
+      var deltaHtml = '';
+
+      if (curDist !== null) {
+        var delta = d - curDist;
+        var absDelta = Math.abs(delta);
+        if (absDelta < 0.1) {
+          deltaHtml = '<span class="delta-eq">≈ same</span>';
+        } else if (delta < 0) {
+          deltaHtml = '<span class="delta-dn">↓ −'+absDelta.toFixed(1)+' mi</span>';
+        } else {
+          deltaHtml = '<span class="delta-up">↑ +'+absDelta.toFixed(1)+' mi</span>';
+        }
+      }
+
+      tbl += '<td class="'+(near?'cn ':'')+''+(best?'cb':'')+'">' + d.toFixed(1) + deltaHtml + '</td>';
     });
     tbl += '</tr>';
   });
@@ -1004,38 +968,46 @@ function buildTop3(rows, newCols, newOff, total, hasCD) {
   if (!newCols.length) { document.getElementById('top3').innerHTML = ''; return; }
   var scores = newCols.map(function(col, ni){
     var ci = newOff + ni;
-    var u50=0, posImp=0, miSaved=0;
+    var u50=0, wins=0, losses=0, ties=0, miSaved=0;
     rows.forEach(function(row){
       var nd = row.distances[ci];
       if (nd === null) return;
       if (nd < 50) u50++;
       if (hasCD && row.distances[0] !== null) {
         var diff = row.distances[0] - nd;
-        if (diff > 0) { posImp++; miSaved += diff; }
+        if (diff > 0.1) { wins++; miSaved += diff; }
+        else if (diff < -0.1) { losses++; }
+        else { ties++; }
       }
     });
     return {
       label: col.label,
       u50: u50,
       u50Pct: total > 0 ? ((u50/total)*100).toFixed(1) : 0,
-      posImp: posImp,
-      avgSaved: posImp > 0 ? (miSaved/posImp).toFixed(1) : '—'
+      wins: wins, losses: losses, ties: ties,
+      avgSaved: wins > 0 ? (miSaved/wins).toFixed(1) : '—'
     };
   });
-  scores.sort(function(a,b){ return b.u50-a.u50 || b.posImp-a.posImp; });
+  scores.sort(function(a,b){ return b.u50-a.u50 || b.wins-a.wins; });
   var top = scores.slice(0,3);
   var medals = ['🥇','🥈','🥉'], ranks = ['r1','r2','r3'];
   var html = '<div class="t3panel"><div class="t3title">⚡ Top '+top.length+' New Location'+(top.length>1?'s':'')+' — Commute Impact Ranking</div><div class="t3list">';
-  top.forEach(function(s, i){
-    var impStr = '';
-    if (hasCD && s.posImp > 0) {
-      impStr = ' &nbsp;·&nbsp; <strong style="color:var(--accent2)">'+s.posImp+'</strong> employees improve vs. current office (avg <strong style="color:var(--text)">'+s.avgSaved+' mi</strong> saved)';
+  top.forEach(function(sc, i){
+    var wlHtml = '';
+    if (hasCD) {
+      wlHtml = '<div class="wl-row">';
+      if (sc.wins > 0)   wlHtml += '<span class="wl-pill wl-win">↓ '+sc.wins+' shorter commute'+(sc.wins!==1?'s':'')+' · avg −'+sc.avgSaved+' mi</span>';
+      if (sc.losses > 0) wlHtml += '<span class="wl-pill wl-loss">↑ '+sc.losses+' longer commute'+(sc.losses!==1?'s':'')+'</span>';
+      if (sc.ties > 0)   wlHtml += '<span class="wl-pill wl-tie">≈ '+sc.ties+' no change</span>';
+      wlHtml += '</div>';
     }
     html += '<div class="t3item">'+
       '<div class="t3rank '+ranks[i]+'">'+medals[i]+'</div>'+
-      '<div style="flex:1"><div class="t3lbl">'+s.label+'</div>'+
-      '<div class="t3det"><strong style="color:var(--accent)">'+s.u50+'</strong> of '+total+' employees ('+s.u50Pct+'%) would have a ≤50 mi commute'+impStr+'</div></div>'+
-      '<div class="t3badge">'+s.u50Pct+'% ≤50 mi</div>'+
+      '<div style="flex:1"><div class="t3lbl">'+sc.label+'</div>'+
+      '<div class="t3det"><strong style="color:var(--accent)">'+sc.u50+'</strong> of '+total+' employees ('+sc.u50Pct+'%) would have a ≤50 mi commute</div>'+
+      wlHtml+
+      '</div>'+
+      '<div class="t3badge">'+sc.u50Pct+'% ≤50 mi</div>'+
     '</div>';
   });
   html += '</div></div>';
@@ -1119,7 +1091,7 @@ function buildCapacity(rows, newCols, newOff, total, dests) {
 }
 
 // ─────────────────────────────────────────────
-// EXPORT
+// EXPORT — XLSX
 // ─────────────────────────────────────────────
 function exportXlsx() {
   if (!resultsData) return;
@@ -1169,24 +1141,215 @@ function exportXlsx() {
 }
 
 // ─────────────────────────────────────────────
+// EXPORT — WORD DOC SUMMARY
+// ─────────────────────────────────────────────
+function exportWord() {
+  if (!resultsData) return;
+  var rd = resultsData;
+  var columns = rd.columns, rows = rd.rows, hasCD = rd.hasCD, dests = rd.dests;
+  var total = rows.length;
+  var newOff = hasCD ? 1 : 0;
+  var newCols = columns.filter(function(c){ return c.type === 'new'; });
+  var date = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+
+  var w50 = rows.filter(function(r){ return r.distances.some(function(d){ return d!==null&&d<50; }); }).length;
+  var pct50 = total > 0 ? ((w50/total)*100).toFixed(1) : 0;
+
+  // Win/loss per location
+  var locStats = newCols.map(function(col, ni){
+    var ci = newOff + ni;
+    var u50=0, wins=0, losses=0, ties=0, miSaved=0, distSum=0, distCnt=0;
+    rows.forEach(function(row){
+      var nd = row.distances[ci];
+      if (nd === null) return;
+      if (nd < 50) u50++;
+      distSum += nd; distCnt++;
+      if (hasCD && row.distances[0] !== null) {
+        var diff = row.distances[0] - nd;
+        if (diff > 0.1) { wins++; miSaved += diff; }
+        else if (diff < -0.1) { losses++; }
+        else ties++;
+      }
+    });
+    // Commute bands
+    var b0=0,b25=0,b50=0,b75=0;
+    rows.forEach(function(row){
+      var nd = row.distances[ci]; if (nd===null) return;
+      if (nd<=25) b0++; else if (nd<=50) b25++; else if (nd<=75) b50++; else b75++;
+    });
+    return {
+      label: col.label,
+      u50: u50, u50Pct: total>0?((u50/total)*100).toFixed(1):0,
+      wins: wins, losses: losses, ties: ties,
+      avgSaved: wins>0?(miSaved/wins).toFixed(1):'—',
+      avgDist: distCnt>0?(distSum/distCnt).toFixed(1):'—',
+      b0:b0, b25:b25, b50:b50, b75:b75
+    };
+  });
+  locStats.sort(function(a,b){ return b.u50-a.u50; });
+
+  // Capacity allocation
+  var assign = {};
+  newCols.forEach(function(c){ assign[c.label]=[]; });
+  rows.forEach(function(row){
+    var bIdx=-1, bDist=Infinity;
+    newCols.forEach(function(_,ni){ var d=row.distances[newOff+ni]; if(d!==null&&d<bDist){bDist=d;bIdx=ni;} });
+    if (bIdx!==-1) assign[newCols[bIdx].label].push({dist:bDist});
+  });
+
+  // ── Build HTML for Word ──
+  var improveRow = '';
+  if (hasCD) {
+    var imp = rows.filter(function(r){
+      var cur = r.distances[0]; if (cur===null) return false;
+      return newCols.some(function(_,ni){ var nd=r.distances[newOff+ni]; return nd!==null&&nd<cur; });
+    }).length;
+    improveRow = '<tr><td>Employees with an improved commute at ≥1 location</td><td><b>'+imp+' ('+((imp/total)*100).toFixed(1)+'%)</b></td></tr>';
+  }
+
+  var rankRows = locStats.map(function(ls, i){
+    var wlTxt = hasCD ? (ls.wins+' shorter / '+ls.losses+' longer / '+ls.ties+' same') : 'N/A';
+    var avgSavedTxt = hasCD && ls.wins>0 ? ('Avg −'+ls.avgSaved+' mi for improvers') : '';
+    return '<tr'+(i%2===0?' style="background:#f7f9fc"':'')+'>'+
+      '<td style="font-weight:600">'+(i<3?['🥇','🥈','🥉'][i]:'#'+(i+1))+' '+ls.label+'</td>'+
+      '<td style="text-align:center">'+ls.u50+' ('+ls.u50Pct+'%)</td>'+
+      '<td style="text-align:center">'+ls.avgDist+' mi</td>'+
+      '<td style="text-align:center">'+(hasCD?wlTxt:'—')+'</td>'+
+      '<td style="text-align:center;font-size:9pt;color:#555">'+avgSavedTxt+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var capRows2 = Object.entries(assign).sort(function(a,b){return b[1].length-a[1].length;}).map(function(e,i){
+    var emps = e[1], cnt = emps.length;
+    var dists = emps.map(function(x){return x.dist;});
+    var avg = cnt>0?(dists.reduce(function(a,b){return a+b;},0)/cnt).toFixed(1):'—';
+    var capObj = dests.find(function(d){return d.label===e[0];});
+    var cap = capObj && capObj.capacity ? parseInt(capObj.capacity) : null;
+    var capStr = cap ? cap.toLocaleString() : '—';
+    var utilStr = cap ? Math.round((cnt/cap)*100)+'%'+(cnt>=cap?' ⚠ OVER':cnt>=cap*0.8?' ⚠ NEAR':'') : '—';
+    return '<tr'+(i%2===0?' style="background:#f7f9fc"':'')+'>'+
+      '<td style="font-weight:600">'+e[0]+'</td>'+
+      '<td style="text-align:center">'+cnt+'</td>'+
+      '<td style="text-align:center">'+((cnt/total)*100).toFixed(1)+'%</td>'+
+      '<td style="text-align:center">'+avg+' mi</td>'+
+      '<td style="text-align:center">'+capStr+'</td>'+
+      '<td style="text-align:center">'+utilStr+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var bandRows = locStats.map(function(ls,i){
+    var tot = ls.b0+ls.b25+ls.b50+ls.b75;
+    function pct(n){ return tot>0?Math.round((n/tot)*100)+'%':'0%'; }
+    return '<tr'+(i%2===0?' style="background:#f7f9fc"':'')+'>'+
+      '<td style="font-weight:600">'+ls.label+'</td>'+
+      '<td style="text-align:center">'+ls.b0+' ('+pct(ls.b0)+')</td>'+
+      '<td style="text-align:center">'+ls.b25+' ('+pct(ls.b25)+')</td>'+
+      '<td style="text-align:center">'+ls.b50+' ('+pct(ls.b50)+')</td>'+
+      '<td style="text-align:center">'+ls.b75+' ('+pct(ls.b75)+')</td>'+
+    '</tr>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+  '<head><meta charset="utf-8"><title>DistanceIQ Commute Analysis</title>'+
+  '<style>'+
+    'body{font-family:Calibri,Arial,sans-serif;margin:2cm;color:#1a1a2e;font-size:10pt;}'+
+    'h1{font-size:18pt;color:#003366;border-bottom:2pt solid #003366;padding-bottom:6pt;margin-bottom:4pt;}'+
+    'h2{font-size:12pt;color:#003366;margin-top:20pt;margin-bottom:6pt;border-left:4pt solid #00b894;padding-left:8pt;}'+
+    '.meta{font-size:9pt;color:#666;margin-bottom:18pt;}'+
+    '.metrics{width:100%;border-collapse:collapse;margin-bottom:18pt;}'+
+    '.metrics td{padding:5pt 10pt;border-bottom:0.75pt solid #dde3ed;font-size:10pt;}'+
+    '.metrics td:first-child{color:#555;width:65%;}'+
+    '.metrics td:last-child{font-weight:bold;color:#003366;text-align:right;}'+
+    'table.data{border-collapse:collapse;width:100%;margin-bottom:16pt;font-size:9pt;}'+
+    'table.data th{background:#003366;color:#fff;padding:6pt 8pt;text-align:left;font-size:9pt;}'+
+    'table.data td{padding:5pt 8pt;border-bottom:0.5pt solid #d0d8e8;vertical-align:top;}'+
+    '.note{font-size:8pt;color:#777;font-style:italic;margin-top:20pt;border-top:0.5pt solid #ccc;padding-top:8pt;}'+
+    '.page-break{page-break-before:always;}'+
+  '</style></head><body>'+
+  '<h1>DistanceIQ — Commute Impact Analysis</h1>'+
+  '<div class="meta">Report generated: '+date+' &nbsp;·&nbsp; '+total+' employees analyzed &nbsp;·&nbsp; '+newCols.length+' location'+(newCols.length!==1?'s':'')+' evaluated</div>'+
+
+  '<h2>Executive Summary</h2>'+
+  '<table class="metrics">'+
+    '<tr><td>Total employees analyzed</td><td>'+total+'</td></tr>'+
+    '<tr><td>Employees within 50 miles of ≥1 new location</td><td>'+w50+' ('+pct50+'%)</td></tr>'+
+    improveRow+
+    '<tr><td>New office locations evaluated</td><td>'+newCols.length+'</td></tr>'+
+    (rd.failedEmps>0?'<tr><td style="color:#c0392b">Unresolved employee addresses (shown as —)</td><td style="color:#c0392b">'+rd.failedEmps+'</td></tr>':'')+
+  '</table>'+
+
+  '<h2>Location Ranking</h2>'+
+  '<p style="font-size:9pt;color:#555;margin-bottom:8pt;">Ranked by number of employees within a 50-mile commute. '+(hasCD?'Win/loss shows commute change vs. current office.':'')+'</p>'+
+  '<table class="data">'+
+    '<thead><tr>'+
+      '<th>Location</th>'+
+      '<th style="text-align:center">≤50 mi</th>'+
+      '<th style="text-align:center">Avg Commute</th>'+
+      '<th style="text-align:center">'+(hasCD?'vs. Current':'')+'</th>'+
+      '<th style="text-align:center">'+(hasCD?'Improvement':'')+'</th>'+
+    '</tr></thead>'+
+    '<tbody>'+rankRows+'</tbody>'+
+  '</table>'+
+
+  '<h2>Capacity Allocation</h2>'+
+  '<p style="font-size:9pt;color:#555;margin-bottom:8pt;">Each employee assigned to the new location with the lowest mileage from their home.</p>'+
+  '<table class="data">'+
+    '<thead><tr>'+
+      '<th>Location</th>'+
+      '<th style="text-align:center">Assigned</th>'+
+      '<th style="text-align:center">% of Total</th>'+
+      '<th style="text-align:center">Avg Commute</th>'+
+      '<th style="text-align:center">Capacity</th>'+
+      '<th style="text-align:center">Utilization</th>'+
+    '</tr></thead>'+
+    '<tbody>'+capRows2+'</tbody>'+
+  '</table>'+
+
+  '<h2>Commute Distance Distribution</h2>'+
+  '<p style="font-size:9pt;color:#555;margin-bottom:8pt;">Straight-line mileage bands from employee home address to each new location.</p>'+
+  '<table class="data">'+
+    '<thead><tr>'+
+      '<th>Location</th>'+
+      '<th style="text-align:center">0–25 mi</th>'+
+      '<th style="text-align:center">25–50 mi</th>'+
+      '<th style="text-align:center">50–75 mi</th>'+
+      '<th style="text-align:center">75+ mi</th>'+
+    '</tr></thead>'+
+    '<tbody>'+bandRows+'</tbody>'+
+  '</table>'+
+
+  '<div class="note">Distances are straight-line (haversine) miles, one-way. Actual drive distances will be longer. Geocoding uses the US Census Bureau API with ZIP-centroid fallback. '+(rd.failedEmps>0?rd.failedEmps+' employee address(es) could not be resolved and are excluded from location distance calculations. ':'')+'Generated by DistanceIQ.</div>'+
+  '</body></html>';
+
+  var blob = new Blob(['\ufeff', html], {type:'application/msword'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'DistanceIQ_Commute_Summary.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Word summary exported!', 'suc');
+}
+
+// ─────────────────────────────────────────────
 // RESET
 // ─────────────────────────────────────────────
 function resetAll() {
-  empData=[]; newLocs=[]; zipRef=new Map(); resultsData=null; dCnt=0;
+  empData=[]; newLocs=[]; zipRef=new Map(); resultsData=null;
+  empReady=false; locReady=false;
   ['emp-loaded','emp-preview','zip-loaded','dest-loaded','dest-preview'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.innerHTML='';
   });
   ['emp-err','zip-err','dest-err'].forEach(function(id){ clearErr(id); });
-  document.getElementById('btn-step2-next').disabled = true;
+  document.getElementById('btn-calc').disabled = true;
   ['fi-emp','fi-zip','fi-dest'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value='';
   });
-  [1,2,3,4].forEach(function(n){
+  [1,2,3].forEach(function(n){
     document.getElementById('tab-'+n).classList.remove('done');
     document.getElementById('snum-'+n).textContent = n;
   });
-  setMode('upload');
-  initDests();
   goTo(1);
 }
 
@@ -1227,11 +1390,6 @@ function toast(msg, type) {
   c.appendChild(t);
   setTimeout(function(){ t.remove(); }, 4500);
 }
-
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-initDests();
 </script>
 </body>
 </html>
