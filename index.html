@@ -64,19 +64,23 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pill{font-family:var(--mono);font-size:10px;padding:3px 8px;background:var(--border);border-radius:3px;color:var(--muted)}
 
-/* UPLOAD ZONES */
-.uzone{border:2px dashed var(--border2);border-radius:8px;padding:36px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);position:relative}
-.uzone:hover,.uzone.drag{border-color:var(--accent);background:rgba(0,212,170,.04)}
-.uzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.uzone-sm{padding:22px}
-.uico{font-size:30px;margin-bottom:8px}
-.ulbl{font-size:15px;font-weight:500;margin-bottom:4px}
-.usub{font-size:12px;color:var(--muted);font-family:var(--mono)}
-
-/* FILE LOADED */
-.floaded{display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(0,212,170,.07);border:1px solid var(--hi-b);border-radius:6px;margin-top:12px}
-.floaded-name{font-family:var(--mono);font-size:13px;color:var(--accent)}
-.floaded-sub{font-size:12px;color:var(--muted)}
+/* PASTE ZONES */
+.pzone{border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--surface2)}
+.pzone-hdr{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--border);background:var(--surface)}
+.pzone-ico{font-size:17px;flex-shrink:0}
+.pzone-title{font-size:12px;color:var(--muted);flex:1;font-family:var(--mono);line-height:1.4}
+.pzone-clear{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--border2);background:none;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0}
+.pzone-clear:hover{border-color:var(--danger);color:var(--danger)}
+.pzone-ta{width:100%;min-height:130px;background:transparent;color:var(--text);border:none;padding:13px 15px;font-family:var(--mono);font-size:12px;resize:vertical;outline:none;line-height:1.65;display:block;tab-size:4}
+.pzone-ta::placeholder{color:var(--border2);line-height:2}
+.pzone-ta:focus{background:rgba(0,212,170,.02)}
+.pzone-ta.has-data{color:var(--text)}
+.pzone-status{padding:8px 15px;border-top:1px solid var(--border);font-size:12px;font-family:var(--mono);color:var(--muted);min-height:35px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ps-tag{background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.3);padding:2px 9px;border-radius:3px;font-size:11px;white-space:nowrap}
+.ps-err{color:var(--danger);font-size:12px}
+.ps-hint{color:var(--muted);font-size:11px}
+.paste-tip{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:rgba(0,153,255,.06);border:1px solid rgba(0,153,255,.2);border-radius:6px;font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.paste-tip-icon{font-size:15px;flex-shrink:0;margin-top:1px}
 
 /* PREVIEW TABLE */
 .ptable-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:6px}
@@ -261,7 +265,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     </div>
     <div class="step-tab" id="tab-2" onclick="goTo(2)">
       <div class="snum" id="snum-2">2</div>
-      <div><div class="slabel">Upload Data</div><div class="ssub">Employees &amp; Locations</div></div>
+      <div><div class="slabel">Paste Data</div><div class="ssub">Employees &amp; Locations</div></div>
     </div>
     <div class="step-tab" id="tab-3" onclick="goTo(3)">
       <div class="snum" id="snum-3">3</div>
@@ -311,52 +315,69 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
       </div>
     </div>
     <div class="abar">
-      <button class="btn btn-p" onclick="goTo(2)">Continue to Upload →</button>
+      <button class="btn btn-p" onclick="goTo(2)">Continue to Paste Data →</button>
     </div>
   </div>
 
-  <!-- ===== STEP 2: ALL DATA UPLOADS ===== -->
+  <!-- ===== STEP 2: ALL DATA PASTE ===== -->
   <div class="section" id="sec-2">
 
-    <div class="panel">
-      <div class="ptitle">// Employee Data</div>
-      <p class="tmuted mt1" style="margin-bottom:16px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office (enables change indicators in results).</p>
-      <div class="uzone" id="uz-emp">
-        <input type="file" accept=".xlsx,.xls,.csv" id="fi-emp" onchange="onEmpFile(this.files[0])">
-        <div class="uico">👥</div>
-        <div class="ulbl">Drop employee file here or click to browse</div>
-        <div class="usub">Accepts .xlsx, .xls, .csv</div>
-      </div>
-      <div id="emp-loaded"></div>
-      <div id="emp-preview"></div>
-      <div id="emp-err" class="verr"></div>
+    <div class="paste-tip">
+      <span class="paste-tip-icon">💡</span>
+      <span>Open each template in Excel, select all data including the header row (<strong style="color:var(--text)">Ctrl+A</strong>), copy (<strong style="color:var(--text)">Ctrl+C</strong>), then click into the box below and paste (<strong style="color:var(--text)">Ctrl+V</strong>). Data is detected automatically.</span>
     </div>
 
     <div class="panel">
-      <div class="ptitle">// New Office Locations</div>
-      <p class="tmuted mt1" style="margin-bottom:16px">One row per potential office location. Each needs a <strong style="color:var(--text)">Label</strong> (e.g. "Downtown HQ") — it will appear across all results.</p>
-      <div class="uzone" id="uz-dest">
-        <input type="file" accept=".xlsx,.xls,.csv" id="fi-dest" onchange="onDestFile(this.files[0])">
-        <div class="uico">🏢</div>
-        <div class="ulbl">Drop locations file here or click to browse</div>
-        <div class="usub">Use the Locations Template from Step 1 &nbsp;·&nbsp; Accepts .xlsx, .xls, .csv</div>
+      <div class="ptitle">// Employee Data <span style="font-weight:300;color:var(--muted)">(Required)</span></div>
+      <p class="tmuted mt1" style="margin-bottom:14px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office — enables commute-change indicators in results.</p>
+      <div class="pzone">
+        <div class="pzone-hdr">
+          <span class="pzone-ico">👥</span>
+          <span class="pzone-title">Paste employee data from the Employee Template (include header row)</span>
+          <button class="pzone-clear" onclick="clearPasteZone('emp')">✕ Clear</button>
+        </div>
+        <textarea class="pzone-ta" id="ta-emp" spellcheck="false"
+          placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Unique Identifier · Origin Street · Origin City · Origin State · Origin Zip"
+          onpaste="onTaPaste('emp')" oninput="onTaInput('emp')"></textarea>
+        <div class="pzone-status" id="ps-emp"><span class="ps-hint">Waiting for data — paste from the Employee Template</span></div>
       </div>
-      <div id="dest-loaded"></div>
+      <div id="emp-preview"></div>
+      <div id="emp-err" class="verr mt2"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ptitle">// New Office Locations <span style="font-weight:300;color:var(--muted)">(Required)</span></div>
+      <p class="tmuted mt1" style="margin-bottom:14px">One row per potential office location. The <strong style="color:var(--text)">Label</strong> column (e.g. "Downtown HQ") appears throughout all results.</p>
+      <div class="pzone">
+        <div class="pzone-hdr">
+          <span class="pzone-ico">🏢</span>
+          <span class="pzone-title">Paste location data from the Locations Template (include header row)</span>
+          <button class="pzone-clear" onclick="clearPasteZone('dest')">✕ Clear</button>
+        </div>
+        <textarea class="pzone-ta" id="ta-dest" spellcheck="false"
+          placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Location Label · Street · City · State · Zip · Capacity (optional)"
+          onpaste="onTaPaste('dest')" oninput="onTaInput('dest')"></textarea>
+        <div class="pzone-status" id="ps-dest"><span class="ps-hint">Waiting for data — paste from the Locations Template</span></div>
+      </div>
       <div id="dest-preview"></div>
       <div id="dest-err" class="verr mt2"></div>
     </div>
 
     <div class="panel">
-      <div class="ptitle">// ZIP Code Reference File <span style="color:var(--muted);font-weight:300">(Optional — Strongly Recommended)</span></div>
-      <p class="tmuted mt1" style="margin-bottom:14px">Guarantees geocoding for any US ZIP code. Without this, addresses that fail all API tiers will show "—". Download the full dataset from <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a>. Needs columns: <strong style="color:var(--text)">zip, latitude, longitude</strong>.</p>
-      <div class="uzone uzone-sm" id="uz-zip">
-        <input type="file" accept=".xlsx,.xls,.csv" id="fi-zip" onchange="onZipFile(this.files[0])">
-        <div class="uico">📍</div>
-        <div class="ulbl">Drop ZIP reference file here or click to browse</div>
-        <div class="usub">Zip | Latitude | Longitude</div>
+      <div class="ptitle">// ZIP Code Reference <span style="font-weight:300;color:var(--muted)">(Optional — Strongly Recommended)</span></div>
+      <p class="tmuted mt1" style="margin-bottom:14px">Guarantees geocoding for any US ZIP code. Without it, unresolvable addresses show "—". Download the full dataset (42,000+ ZIPs) from <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a>, then paste here. Requires columns: <strong style="color:var(--text)">zip, latitude, longitude</strong>.</p>
+      <div class="pzone">
+        <div class="pzone-hdr">
+          <span class="pzone-ico">📍</span>
+          <span class="pzone-title">Paste ZIP reference data (include header row) — large datasets supported</span>
+          <button class="pzone-clear" onclick="clearPasteZone('zip')">✕ Clear</button>
+        </div>
+        <textarea class="pzone-ta" id="ta-zip" spellcheck="false"
+          placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Zip · Latitude · Longitude"
+          onpaste="onTaPaste('zip')" oninput="onTaInput('zip')"></textarea>
+        <div class="pzone-status" id="ps-zip"><span class="ps-hint">Optional — skipping this may reduce geocoding accuracy for uncommon ZIP codes</span></div>
       </div>
-      <div id="zip-loaded"></div>
-      <div id="zip-err" class="verr"></div>
+      <div id="zip-err" class="verr mt2"></div>
     </div>
 
     <div class="abar">
@@ -498,63 +519,126 @@ function dlZipTemplate() {
 }
 
 // ─────────────────────────────────────────────
-// DRAG & DROP SETUP
+// TSV PARSING (Excel copy → tab-separated text)
 // ─────────────────────────────────────────────
-function setupDrop(zoneId, handler) {
-  var zone = document.getElementById(zoneId);
-  if (!zone) return;
-  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag'); });
-  zone.addEventListener('dragleave', function(){ zone.classList.remove('drag'); });
-  zone.addEventListener('drop', function(e){
-    e.preventDefault(); zone.classList.remove('drag');
-    var f = e.dataTransfer.files[0]; if (f) handler(f);
+function parseTsv(text) {
+  var lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim().split('\n');
+  return lines.map(function(line){
+    return line.split('\t').map(function(cell){
+      cell = cell.trim();
+      if (cell.length > 1 && cell.charAt(0) === '"' && cell.charAt(cell.length-1) === '"') {
+        cell = cell.slice(1,-1).replace(/""/g,'"');
+      }
+      return cell;
+    });
   });
 }
 
 // ─────────────────────────────────────────────
-// EMPLOYEE FILE
+// PASTE EVENT HANDLERS
 // ─────────────────────────────────────────────
-setupDrop('uz-emp', function(f){ onEmpFile(f); });
+var _pasteTimers = {};
 
-function onEmpFile(file) {
-  if (!file) return;
-  readXlsx(file, function(rows, err) {
-    if (err) { setErr('emp-err', err); return; }
-    if (rows.length < 2) { setErr('emp-err','File appears empty.'); return; }
-    var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
-    var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
-    var cm = {
-      id:      fc(hdrs,['unique identifier','id','identifier','employee id']),
-      oSt:     fc(hdrs,['origin street','home street']),
-      oCity:   fc(hdrs,['origin city','home city']),
-      oState:  fc(hdrs,['origin state','home state']),
-      oZip:    fc(hdrs,['origin zip','home zip']),
-      dSt:     fc(hdrs,['current destination street','dest street','destination street','office street']),
-      dCity:   fc(hdrs,['current destination city','dest city','destination city','office city']),
-      dState:  fc(hdrs,['current destination state','dest state','destination state','office state']),
-      dZip:    fc(hdrs,['current destination zip','dest zip','destination zip','office zip'])
-    };
-    if (cm.id === -1 || cm.oSt === -1) { setErr('emp-err','Cannot find required columns. Use the employee template.'); return; }
-    empData = data.map(function(r){
-      return {
-        id:        s(r[cm.id]),
-        oStreet:   s(r[cm.oSt]),
-        oCity:     s(r[cm.oCity]),
-        oState:    s(r[cm.oState]),
-        oZip:      s(r[cm.oZip]),
-        dStreet:   cm.dSt    > -1 ? s(r[cm.dSt])    : '',
-        dCity:     cm.dCity  > -1 ? s(r[cm.dCity])  : '',
-        dState:    cm.dState > -1 ? s(r[cm.dState]) : '',
-        dZip:      cm.dZip   > -1 ? s(r[cm.dZip])   : ''
-      };
-    }).filter(function(r){ return r.id && r.oStreet; });
-    if (!empData.length) { setErr('emp-err','No valid rows found.'); return; }
+function onTaPaste(type) {
+  clearTimeout(_pasteTimers[type]);
+  _pasteTimers[type] = setTimeout(function(){ parseSection(type); }, 30);
+}
+
+function onTaInput(type) {
+  clearTimeout(_pasteTimers[type]);
+  _pasteTimers[type] = setTimeout(function(){ parseSection(type); }, 700);
+}
+
+function setPasteStatus(type, html) {
+  var el = document.getElementById('ps-'+type);
+  if (el) el.innerHTML = html;
+}
+
+function clearPasteZone(type) {
+  var ta = document.getElementById('ta-'+type);
+  if (ta) { ta.value = ''; ta.classList.remove('has-data'); }
+  var hints = {
+    emp:  'Waiting for data — paste from the Employee Template',
+    dest: 'Waiting for data — paste from the Locations Template',
+    zip:  'Optional — skipping this may reduce geocoding accuracy for uncommon ZIP codes'
+  };
+  setPasteStatus(type, '<span class="ps-hint">'+hints[type]+'</span>');
+  if (type === 'emp') {
+    empData=[]; empReady=false;
+    document.getElementById('emp-preview').innerHTML='';
     clearErr('emp-err');
-    showLoaded('emp-loaded', file.name, empData.length + ' employees loaded');
-    showEmpPreview();
-    empReady = true;
-    checkReady();
-  });
+  } else if (type === 'dest') {
+    newLocs=[]; locReady=false;
+    document.getElementById('dest-preview').innerHTML='';
+    clearErr('dest-err');
+  } else if (type === 'zip') {
+    zipRef=new Map(); clearErr('zip-err');
+  }
+  checkReady();
+}
+
+function parseSection(type) {
+  var ta = document.getElementById('ta-'+type);
+  if (!ta) return;
+  var text = ta.value.trim();
+  if (!text) { clearPasteZone(type); return; }
+  var rows = parseTsv(text);
+  if (type === 'emp')  processEmpRows(rows);
+  else if (type === 'dest') processDestRows(rows);
+  else if (type === 'zip')  processZipRows(rows);
+}
+
+// ─────────────────────────────────────────────
+// EMPLOYEE PASTE PROCESSING
+// ─────────────────────────────────────────────
+function processEmpRows(rows) {
+  if (rows.length < 2) {
+    setPasteStatus('emp','<span class="ps-err">No data rows found — make sure to include the header row when you copy.</span>'); return;
+  }
+  var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
+  var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c.trim()!==''; }); });
+  var cm = {
+    id:     fc(hdrs,['unique identifier','id','identifier','employee id']),
+    oSt:    fc(hdrs,['origin street','home street']),
+    oCity:  fc(hdrs,['origin city','home city']),
+    oState: fc(hdrs,['origin state','home state']),
+    oZip:   fc(hdrs,['origin zip','home zip']),
+    dSt:    fc(hdrs,['current destination street','dest street','destination street','office street']),
+    dCity:  fc(hdrs,['current destination city','dest city','destination city','office city']),
+    dState: fc(hdrs,['current destination state','dest state','destination state','office state']),
+    dZip:   fc(hdrs,['current destination zip','dest zip','destination zip','office zip'])
+  };
+  if (cm.id === -1 || cm.oSt === -1) {
+    setPasteStatus('emp','<span class="ps-err">Could not find required columns (Unique Identifier, Origin Street). Make sure to copy from the Employee Template.</span>'); return;
+  }
+  var parsed = data.map(function(r){
+    return {
+      id:      s(r[cm.id]),
+      oStreet: s(r[cm.oSt]),
+      oCity:   s(r[cm.oCity]),
+      oState:  s(r[cm.oState]),
+      oZip:    s(r[cm.oZip]),
+      dStreet: cm.dSt    > -1 ? s(r[cm.dSt])    : '',
+      dCity:   cm.dCity  > -1 ? s(r[cm.dCity])  : '',
+      dState:  cm.dState > -1 ? s(r[cm.dState]) : '',
+      dZip:    cm.dZip   > -1 ? s(r[cm.dZip])   : ''
+    };
+  }).filter(function(r){ return r.id && r.oStreet; });
+  if (!parsed.length) {
+    setPasteStatus('emp','<span class="ps-err">No valid rows found — check that ID and Origin Street columns have data.</span>'); return;
+  }
+  empData = parsed;
+  var hasDest = empData.some(function(r){ return r.dStreet; });
+  document.getElementById('ta-emp').classList.add('has-data');
+  setPasteStatus('emp',
+    '<span class="ps-tag">✓ '+empData.length+' employees detected</span>' +
+    (hasDest ? ' <span class="ps-hint">· Current office columns found — commute change indicators will be shown</span>'
+              : ' <span class="ps-hint">· No current office columns — add them to enable change indicators</span>')
+  );
+  clearErr('emp-err');
+  showEmpPreview();
+  empReady = true;
+  checkReady();
 }
 
 function showEmpPreview() {
@@ -562,7 +646,7 @@ function showEmpPreview() {
   var hasDest = empData.some(function(r){ return r.dStreet; });
   var html = '<div class="ptable-wrap"><table class="ptable"><thead><tr>' +
     '<th>Employee ID</th><th>Home Street</th><th>City</th><th>State</th><th>Zip</th>' +
-    (hasDest ? '<th>Current Office</th><th>City</th><th>State</th><th>Zip</th>' : '') +
+    (hasDest ? '<th>Current Office Street</th><th>City</th><th>State</th><th>Zip</th>' : '') +
     '</tr></thead><tbody>';
   prev.forEach(function(r){
     html += '<tr><td>'+r.id+'</td><td>'+r.oStreet+'</td><td>'+r.oCity+'</td><td>'+r.oState+'</td><td>'+r.oZip+'</td>';
@@ -570,82 +654,54 @@ function showEmpPreview() {
     html += '</tr>';
   });
   html += '</tbody></table></div>';
-  html += '<div class="pcnt">Showing '+prev.length+' of '+empData.length+' employees</div>';
+  html += '<div class="pcnt">Showing first '+prev.length+' of '+empData.length+' employees</div>';
   document.getElementById('emp-preview').innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
-// ZIP REFERENCE FILE
+// LOCATIONS PASTE PROCESSING
 // ─────────────────────────────────────────────
-setupDrop('uz-zip', function(f){ onZipFile(f); });
-
-function onZipFile(file) {
-  if (!file) return;
-  readXlsx(file, function(rows, err) {
-    if (err) { setErr('zip-err', err); return; }
-    if (rows.length < 2) { setErr('zip-err','File appears empty.'); return; }
-    var hdrs = rows[0].map(function(h){ return String(h||'').trim().toLowerCase(); });
-    var zipCol = hdrs.findIndex(function(h){ return h.includes('zip') || h.includes('postal'); });
-    var latCol = hdrs.findIndex(function(h){ return h.includes('lat'); });
-    var lonCol = hdrs.findIndex(function(h){ return h.includes('lon') || h.includes('lng'); });
-    if (zipCol === -1 || latCol === -1 || lonCol === -1) {
-      setErr('zip-err','Cannot find Zip, Latitude, Longitude columns.'); return;
-    }
-    zipRef = new Map();
-    var loaded = 0;
-    for (var i = 1; i < rows.length; i++) {
-      var row = rows[i];
-      var rawZip = String(row[zipCol]||'').trim().split('.')[0].replace(/\D/g,'');
-      if (!rawZip) continue;
-      var z5 = rawZip.substring(0,5).padStart(5,'0');
-      var lat = parseFloat(row[latCol]);
-      var lon = parseFloat(row[lonCol]);
-      if (!isNaN(lat) && !isNaN(lon)) { zipRef.set(z5, {lat:lat, lon:lon}); loaded++; }
-    }
-    if (!loaded) { setErr('zip-err','No valid ZIP/Lat/Long rows found.'); return; }
-    clearErr('zip-err');
-    showLoaded('zip-loaded', file.name, loaded.toLocaleString() + ' ZIP codes loaded as fallback');
-  });
-}
-
-// ─────────────────────────────────────────────
-// DESTINATION FILE
-// ─────────────────────────────────────────────
-setupDrop('uz-dest', function(f){ onDestFile(f); });
-
-function onDestFile(file) {
-  if (!file) return;
-  readXlsx(file, function(rows, err) {
-    if (err) { setErr('dest-err', err); return; }
-    if (rows.length < 2) { setErr('dest-err','File appears empty.'); return; }
-    var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
-    var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c !== ''; }); });
-    var cm = {
-      label:  fc(hdrs,['location label','label','name','office name','location name']),
-      street: fc(hdrs,['street','address','street address']),
-      city:   fc(hdrs,['city']),
-      state:  fc(hdrs,['state']),
-      zip:    fc(hdrs,['zip','postal','zipcode','zip code']),
-      cap:    fc(hdrs,['capacity','max','headcount','max capacity','building capacity'])
+function processDestRows(rows) {
+  if (rows.length < 2) {
+    setPasteStatus('dest','<span class="ps-err">No data rows found — make sure to include the header row when you copy.</span>'); return;
+  }
+  var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
+  var data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c.trim()!==''; }); });
+  var cm = {
+    label:  fc(hdrs,['location label','label','name','office name','location name']),
+    street: fc(hdrs,['street','address','street address']),
+    city:   fc(hdrs,['city']),
+    state:  fc(hdrs,['state']),
+    zip:    fc(hdrs,['zip','postal','zipcode','zip code']),
+    cap:    fc(hdrs,['capacity','max','headcount','max capacity','building capacity'])
+  };
+  if (cm.label === -1 || cm.street === -1) {
+    setPasteStatus('dest','<span class="ps-err">Could not find required columns (Location Label, Street). Make sure to copy from the Locations Template.</span>'); return;
+  }
+  var parsed = data.map(function(r){
+    return {
+      label:    s(r[cm.label]),
+      street:   s(r[cm.street]),
+      city:     cm.city   > -1 ? s(r[cm.city])  : '',
+      state:    cm.state  > -1 ? s(r[cm.state]) : '',
+      zip:      cm.zip    > -1 ? s(r[cm.zip])   : '',
+      capacity: cm.cap    > -1 ? r[cm.cap]       : null
     };
-    if (cm.label === -1 || cm.street === -1) { setErr('dest-err','Cannot find required columns. Use the Locations Template.'); return; }
-    newLocs = data.map(function(r){
-      return {
-        label:    s(r[cm.label]),
-        street:   s(r[cm.street]),
-        city:     cm.city   > -1 ? s(r[cm.city])  : '',
-        state:    cm.state  > -1 ? s(r[cm.state]) : '',
-        zip:      cm.zip    > -1 ? s(r[cm.zip])   : '',
-        capacity: cm.cap    > -1 ? r[cm.cap]       : null
-      };
-    }).filter(function(r){ return r.label && r.street; });
-    if (!newLocs.length) { setErr('dest-err','No valid location rows found.'); return; }
-    clearErr('dest-err');
-    showLoaded('dest-loaded', file.name, newLocs.length + ' locations loaded');
-    showDestPreview();
-    locReady = true;
-    checkReady();
-  });
+  }).filter(function(r){ return r.label && r.street; });
+  if (!parsed.length) {
+    setPasteStatus('dest','<span class="ps-err">No valid rows found — check that Label and Street columns have data.</span>'); return;
+  }
+  newLocs = parsed;
+  var hasCap = newLocs.some(function(r){ return r.capacity; });
+  document.getElementById('ta-dest').classList.add('has-data');
+  setPasteStatus('dest',
+    '<span class="ps-tag">✓ '+newLocs.length+' location'+(newLocs.length!==1?'s':'')+' detected</span>' +
+    (hasCap ? ' <span class="ps-hint">· Capacity data found — utilization analysis enabled</span>' : '')
+  );
+  clearErr('dest-err');
+  showDestPreview();
+  locReady = true;
+  checkReady();
 }
 
 function showDestPreview() {
@@ -656,8 +712,44 @@ function showDestPreview() {
     html += '<tr><td>'+r.label+'</td><td>'+r.street+'</td><td>'+r.city+'</td><td>'+r.state+'</td><td>'+r.zip+'</td><td>'+(r.capacity||'—')+'</td></tr>';
   });
   html += '</tbody></table></div>';
-  html += '<div class="pcnt">'+newLocs.length+' location(s) loaded</div>';
+  html += '<div class="pcnt">'+newLocs.length+' location(s) ready</div>';
   document.getElementById('dest-preview').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// ZIP REFERENCE PASTE PROCESSING
+// ─────────────────────────────────────────────
+function processZipRows(rows) {
+  if (rows.length < 2) {
+    setPasteStatus('zip','<span class="ps-err">No data rows found — make sure to include the header row when you copy.</span>'); return;
+  }
+  var hdrs = rows[0].map(function(h){ return String(h||'').trim().toLowerCase(); });
+  var zipCol = hdrs.findIndex(function(h){ return h.includes('zip') || h.includes('postal'); });
+  var latCol = hdrs.findIndex(function(h){ return h.includes('lat'); });
+  var lonCol = hdrs.findIndex(function(h){ return h.includes('lon') || h.includes('lng'); });
+  if (zipCol === -1 || latCol === -1 || lonCol === -1) {
+    setPasteStatus('zip','<span class="ps-err">Cannot find Zip, Latitude, Longitude columns. Use the ZIP Reference Template headers.</span>'); return;
+  }
+  var newRef = new Map();
+  var loaded = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i];
+    var rawZip = String(row[zipCol]||'').trim().split('.')[0].replace(/\D/g,'');
+    if (!rawZip) continue;
+    var z5 = rawZip.substring(0,5).padStart(5,'0');
+    var lat = parseFloat(row[latCol]);
+    var lon = parseFloat(row[lonCol]);
+    if (!isNaN(lat) && !isNaN(lon)) { newRef.set(z5, {lat:lat, lon:lon}); loaded++; }
+  }
+  if (!loaded) {
+    setPasteStatus('zip','<span class="ps-err">No valid ZIP/Lat/Long rows found.</span>'); return;
+  }
+  zipRef = newRef;
+  document.getElementById('ta-zip').classList.add('has-data');
+  setPasteStatus('zip',
+    '<span class="ps-tag">✓ '+loaded.toLocaleString()+' ZIP codes loaded</span> <span class="ps-hint">· Geocoding fallback active for all US ZIPs</span>'
+  );
+  clearErr('zip-err');
 }
 
 // ─────────────────────────────────────────────
@@ -1529,14 +1621,12 @@ function exportWord() {
 function resetAll() {
   empData=[]; newLocs=[]; zipRef=new Map(); resultsData=null;
   empReady=false; locReady=false;
-  ['emp-loaded','emp-preview','zip-loaded','dest-loaded','dest-preview'].forEach(function(id){
+  ['emp-preview','dest-preview'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.innerHTML='';
   });
   ['emp-err','zip-err','dest-err'].forEach(function(id){ clearErr(id); });
   document.getElementById('btn-calc').disabled = true;
-  ['fi-emp','fi-zip','fi-dest'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value='';
-  });
+  ['emp','dest','zip'].forEach(function(type){ clearPasteZone(type); });
   [1,2,3].forEach(function(n){
     document.getElementById('tab-'+n).classList.remove('done');
     document.getElementById('snum-'+n).textContent = n;
@@ -1557,23 +1647,6 @@ function fc(headers, aliases) {
 function s(v) { return String(v||'').trim(); }
 function setErr(id, msg) { var el=document.getElementById(id); if(el) el.textContent=msg; }
 function clearErr(id) { var el=document.getElementById(id); if(el) el.textContent=''; }
-function showLoaded(id, name, sub) {
-  var el = document.getElementById(id); if (!el) return;
-  el.innerHTML = '<div class="floaded"><div style="font-size:20px">✅</div>' +
-    '<div><div class="floaded-name">'+name+'</div><div class="floaded-sub">'+sub+'</div></div></div>';
-}
-function readXlsx(file, cb) {
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      var wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-      var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-      cb(rows, null);
-    } catch(err) { cb(null, 'Read error: '+err.message); }
-  };
-  reader.onerror = function(){ cb(null,'File read failed.'); };
-  reader.readAsArrayBuffer(file);
-}
 function toast(msg, type) {
   var c = document.getElementById('tcon');
   var t = document.createElement('div');
