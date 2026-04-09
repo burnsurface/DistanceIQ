@@ -364,18 +364,11 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
     </div>
 
     <div class="panel">
-      <div class="ptitle">// ZIP Code Reference <span style="font-weight:300;color:var(--muted)">(Optional — Strongly Recommended)</span></div>
-      <p class="tmuted mt1" style="margin-bottom:14px">Guarantees geocoding for any US ZIP code. Without it, unresolvable addresses show "—". Download the full dataset (42,000+ ZIPs) from <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a>, then paste here. Requires columns: <strong style="color:var(--text)">zip, latitude, longitude</strong>.</p>
-      <div class="pzone">
-        <div class="pzone-hdr">
-          <span class="pzone-ico">📍</span>
-          <span class="pzone-title">Paste ZIP reference data (include header row) — large datasets supported</span>
-          <button class="pzone-clear" onclick="clearPasteZone('zip')">✕ Clear</button>
-        </div>
-        <textarea class="pzone-ta" id="ta-zip" spellcheck="false"
-          placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Zip · Latitude · Longitude"
-          onpaste="onTaPaste('zip')" oninput="onTaInput('zip')"></textarea>
-        <div class="pzone-status" id="ps-zip"><span class="ps-hint">Optional — skipping this may reduce geocoding accuracy for uncommon ZIP codes</span></div>
+      <div class="ptitle">// ZIP Code Reference <span style="font-weight:300;color:var(--muted)">(Auto-Loaded)</span></div>
+      <p class="tmuted mt1" style="margin-bottom:14px">The app automatically loads <code style="color:var(--accent2);font-size:11px">zip_codes.csv</code> from the project folder at startup. When loaded, all geocoding resolves instantly via ZIP lookup — no API calls needed for large datasets. Place a CSV with columns <strong style="color:var(--text)">zip, latitude, longitude</strong> in the project root to enable this. Full dataset (42,000+ ZIPs): <a href="https://www.unitedstateszipcodes.org" target="_blank" style="color:var(--accent2)">unitedstateszipcodes.org</a></p>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;font-family:var(--mono);font-size:12px">
+        <span style="font-size:16px">📍</span>
+        <div id="zip-autoload-status" style="flex:1;color:var(--muted)">Checking for zip_codes.csv…</div>
       </div>
       <div id="zip-err" class="verr mt2"></div>
     </div>
@@ -412,6 +405,7 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
         <div class="export-btns">
           <button class="btn btn-w" onclick="exportWord()">⬇ Summary (.doc)</button>
           <button class="btn btn-g" onclick="exportXlsx()">⬇ Export Results (.xlsx)</button>
+          <button class="btn btn-p" onclick="downloadCsv()">⬇ Download Full CSV</button>
         </div>
       </div>
       <div class="mwrap" id="mwrap"></div>
@@ -636,7 +630,6 @@ function processEmpRows(rows) {
               : ' <span class="ps-hint">· No current office columns — add them to enable change indicators</span>')
   );
   clearErr('emp-err');
-  showEmpPreview();
   empReady = true;
   checkReady();
 }
@@ -699,7 +692,6 @@ function processDestRows(rows) {
     (hasCap ? ' <span class="ps-hint">· Capacity data found — utilization analysis enabled</span>' : '')
   );
   clearErr('dest-err');
-  showDestPreview();
   locReady = true;
   checkReady();
 }
@@ -717,18 +709,61 @@ function showDestPreview() {
 }
 
 // ─────────────────────────────────────────────
+// ZIP CSV AUTO-LOAD (from zip_codes.csv on disk)
+// ─────────────────────────────────────────────
+function parseCsv(text) {
+  var lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim().split('\n');
+  return lines.map(function(line){
+    var cells = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
+
+async function loadZipCsv() {
+  var statusEl = document.getElementById('zip-autoload-status');
+  try {
+    var resp = await fetch('./zip_codes.csv');
+    if (!resp.ok) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">zip_codes.csv not found — using embedded ZIP table + API fallback</span>';
+      return;
+    }
+    var text = await resp.text();
+    var rows = parseCsv(text);
+    if (rows.length < 2) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">zip_codes.csv appears empty</span>';
+      return;
+    }
+    processZipRows(rows, true);
+  } catch(e) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">zip_codes.csv not found — using embedded ZIP table + API fallback</span>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){ loadZipCsv(); });
+
+// ─────────────────────────────────────────────
 // ZIP REFERENCE PASTE PROCESSING
 // ─────────────────────────────────────────────
-function processZipRows(rows) {
+function processZipRows(rows, fromFile) {
+  var statusEl = fromFile ? document.getElementById('zip-autoload-status') : null;
   if (rows.length < 2) {
-    setPasteStatus('zip','<span class="ps-err">No data rows found — make sure to include the header row when you copy.</span>'); return;
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">zip_codes.csv has no data rows</span>';
+    return;
   }
   var hdrs = rows[0].map(function(h){ return String(h||'').trim().toLowerCase(); });
   var zipCol = hdrs.findIndex(function(h){ return h.includes('zip') || h.includes('postal'); });
   var latCol = hdrs.findIndex(function(h){ return h.includes('lat'); });
   var lonCol = hdrs.findIndex(function(h){ return h.includes('lon') || h.includes('lng'); });
   if (zipCol === -1 || latCol === -1 || lonCol === -1) {
-    setPasteStatus('zip','<span class="ps-err">Cannot find Zip, Latitude, Longitude columns. Use the ZIP Reference Template headers.</span>'); return;
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">zip_codes.csv missing required columns (zip, latitude, longitude)</span>';
+    return;
   }
   var newRef = new Map();
   var loaded = 0;
@@ -742,13 +777,15 @@ function processZipRows(rows) {
     if (!isNaN(lat) && !isNaN(lon)) { newRef.set(z5, {lat:lat, lon:lon}); loaded++; }
   }
   if (!loaded) {
-    setPasteStatus('zip','<span class="ps-err">No valid ZIP/Lat/Long rows found.</span>'); return;
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">No valid ZIP rows found in zip_codes.csv</span>';
+    return;
   }
   zipRef = newRef;
-  document.getElementById('ta-zip').classList.add('has-data');
-  setPasteStatus('zip',
-    '<span class="ps-tag">✓ '+loaded.toLocaleString()+' ZIP codes loaded</span> <span class="ps-hint">· Geocoding fallback active for all US ZIPs</span>'
-  );
+  if (statusEl) {
+    statusEl.innerHTML =
+      '<span style="background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.3);padding:2px 9px;border-radius:3px;font-size:11px">✓ '+loaded.toLocaleString()+' ZIP codes</span>' +
+      ' <span style="color:var(--muted);font-size:11px">· Loaded from zip_codes.csv — API calls skipped for all matched ZIPs</span>';
+  }
   clearErr('zip-err');
 }
 
@@ -771,7 +808,18 @@ function normZip(zip) {
 async function geocode(street, city, state, zip) {
   var z5 = normZip(zip);
 
-  // Tier 1: US Census Bureau (full address)
+  // Tier 1: ZIP reference file (instant — loaded from zip_codes.csv)
+  // This is checked FIRST so large datasets resolve without any API calls.
+  if (z5.length === 5 && zipRef.size > 0) {
+    var zc = zipRef.get(z5);
+    if (zc) return {lat:zc.lat, lon:zc.lon};
+  }
+
+  // Tier 2: Embedded ZIP table (instant fallback for common ZIPs)
+  var zc2 = ZIPT.get(z5);
+  if (zc2) return {lat:zc2[0], lon:zc2[1]};
+
+  // Tier 3: US Census Bureau full address (API — only reached when ZIP not in reference)
   try {
     var p = new URLSearchParams({street:street, city:city, state:state, zip:z5, benchmark:'Public_AR_Current', format:'json'});
     var r = await fetch('https://geocoding.geo.census.gov/geocoder/locations/address?'+p);
@@ -782,7 +830,7 @@ async function geocode(street, city, state, zip) {
     }
   } catch(e) {}
 
-  // Tier 2: Zippopotam.us ZIP centroid
+  // Tier 4: Zippopotam.us ZIP centroid (API)
   if (z5.length === 5) {
     try {
       var r2 = await fetch('https://api.zippopotam.us/us/'+z5);
@@ -793,7 +841,7 @@ async function geocode(street, city, state, zip) {
     } catch(e) {}
   }
 
-  // Tier 3: Census with generic street
+  // Tier 5: Census city-level fallback (API)
   var attempts = [
     {street:'1 Main St', city:city, state:state, zip:z5},
     {street:'1 Main St', city:city, state:state, zip:''}
@@ -810,16 +858,6 @@ async function geocode(street, city, state, zip) {
       }
     } catch(e) {}
   }
-
-  // Tier 4: Uploaded ZIP reference file
-  if (z5.length === 5 && zipRef.size > 0) {
-    var zc = zipRef.get(z5);
-    if (zc) return {lat:zc.lat, lon:zc.lon};
-  }
-
-  // Tier 4b: Embedded ZIP table
-  var zc2 = ZIPT.get(z5);
-  if (zc2) return {lat:zc2[0], lon:zc2[1]};
 
   return null;
 }
@@ -1064,7 +1102,10 @@ function buildResults(rd) {
   // BAND TABLE
   buildBandTable(rows, newCols, newOff, total);
 
-  // MATRIX
+  // MATRIX — capped at 100 rows to prevent browser freeze on large datasets
+  var DISPLAY_LIMIT = 100;
+  var displayRows = rows.slice(0, DISPLAY_LIMIT);
+
   var tbl = '<table class="mtable"><thead><tr><th class="idc">Employee ID</th>';
   columns.forEach(function(c){
     if (c.type === 'current') {
@@ -1075,7 +1116,7 @@ function buildResults(rd) {
   });
   tbl += '</tr></thead><tbody>';
 
-  rows.forEach(function(row){
+  displayRows.forEach(function(row){
     var newDs = row.distances.slice(newOff).filter(function(d){ return d!==null; });
     var minNew = newDs.length ? Math.min.apply(null, newDs) : null;
     var curDist = (hasCD && row.distances[0] !== null) ? row.distances[0] : null;
@@ -1086,7 +1127,6 @@ function buildResults(rd) {
     row.distances.forEach(function(d, i){
       if (d === null) { tbl += '<td class="cna">—</td>'; return; }
 
-      // Current Office column — plain, no highlights
       if (i === 0 && hasCD) {
         tbl += '<td class="cur-td">'+d.toFixed(1)+'</td>';
         return;
@@ -1113,7 +1153,12 @@ function buildResults(rd) {
     tbl += '</tr>';
   });
   tbl += '</tbody></table>';
-  document.getElementById('mwrap').innerHTML = tbl;
+
+  var truncNote = rows.length > DISPLAY_LIMIT
+    ? '<div style="padding:10px 14px;font-size:12px;font-family:var(--mono);color:var(--muted);border-top:1px solid var(--border)">Showing '+DISPLAY_LIMIT.toLocaleString()+' of '+rows.length.toLocaleString()+' employees — download the full results as CSV below</div>'
+    : '';
+
+  document.getElementById('mwrap').innerHTML = tbl + truncNote;
 
   // CAPACITY
   buildCapacity(rows, newCols, newOff, total, dests);
@@ -1424,8 +1469,39 @@ function exportXlsx() {
 }
 
 // ─────────────────────────────────────────────
-// EXPORT — WORD DOC SUMMARY
+// CSV DOWNLOAD — full dataset, no row limit
 // ─────────────────────────────────────────────
+function downloadCsv() {
+  if (!resultsData) { toast('No results to download.', 'err'); return; }
+  var rd = resultsData;
+  var colHeaders = ['Employee ID'];
+  rd.columns.forEach(function(c){ colHeaders.push(c.label + (c.type === 'current' ? ' (Current mi)' : ' (mi)')); });
+
+  var lines = [colHeaders.map(csvCell).join(',')];
+  rd.rows.forEach(function(row){
+    var cells = [csvCell(row.id)];
+    row.distances.forEach(function(d){ cells.push(d === null ? '' : d.toFixed(1)); });
+    lines.push(cells.join(','));
+  });
+
+  var csv = lines.join('\r\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'DistanceIQ_Full_Results.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('Full CSV downloaded — ' + rd.rows.length.toLocaleString() + ' rows', 'suc');
+}
+
+function csvCell(v) {
+  var s = String(v === null || v === undefined ? '' : v);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
 function exportWord() {
   if (!resultsData) return;
   var rd = resultsData;
@@ -1626,7 +1702,9 @@ function resetAll() {
   });
   ['emp-err','zip-err','dest-err'].forEach(function(id){ clearErr(id); });
   document.getElementById('btn-calc').disabled = true;
-  ['emp','dest','zip'].forEach(function(type){ clearPasteZone(type); });
+  ['emp','dest'].forEach(function(type){ clearPasteZone(type); });
+  var zas = document.getElementById('zip-autoload-status');
+  if (zas) zas.innerHTML = 'Checking for zip_codes.csv…';
   [1,2,3].forEach(function(n){
     document.getElementById('tab-'+n).classList.remove('done');
     document.getElementById('snum-'+n).textContent = n;
