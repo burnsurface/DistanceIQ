@@ -532,6 +532,7 @@ function parseTsv(text) {
 // PASTE EVENT HANDLERS
 // ─────────────────────────────────────────────
 var _pasteTimers = {};
+var _clearedByParse = {}; // guard: prevents debounced re-parse after programmatic textarea clear
 
 function onTaPaste(type) {
   clearTimeout(_pasteTimers[type]);
@@ -549,6 +550,7 @@ function setPasteStatus(type, html) {
 }
 
 function clearPasteZone(type) {
+  _clearedByParse[type] = false; // user-initiated clear — allow future parses
   var ta = document.getElementById('ta-'+type);
   if (ta) { ta.value = ''; ta.classList.remove('has-data'); }
   var hints = {
@@ -574,6 +576,8 @@ function clearPasteZone(type) {
 function parseSection(type) {
   var ta = document.getElementById('ta-'+type);
   if (!ta) return;
+  // If we programmatically cleared the textarea after a successful parse, skip this cycle
+  if (_clearedByParse[type]) { _clearedByParse[type] = false; return; }
   var text = ta.value.trim();
   if (!text) { clearPasteZone(type); return; }
   var rows = parseTsv(text);
@@ -623,11 +627,17 @@ function processEmpRows(rows) {
   }
   empData = parsed;
   var hasDest = empData.some(function(r){ return r.dStreet; });
-  document.getElementById('ta-emp').classList.add('has-data');
+  // Clear textarea immediately to free raw-text memory (~5–10 MB for large datasets)
+  var taEmp = document.getElementById('ta-emp');
+  if (taEmp) {
+    _clearedByParse['emp'] = true; // prevent debounced oninput from wiping parsed data
+    taEmp.value = '';
+    taEmp.classList.add('has-data');
+  }
   setPasteStatus('emp',
-    '<span class="ps-tag">✓ '+empData.length+' employees detected</span>' +
-    (hasDest ? ' <span class="ps-hint">· Current office columns found — commute change indicators will be shown</span>'
-              : ' <span class="ps-hint">· No current office columns — add them to enable change indicators</span>')
+    '<span class="ps-tag">✓ '+empData.length.toLocaleString()+' employees loaded</span>' +
+    (hasDest ? ' <span class="ps-hint">· Current office columns found — commute change indicators enabled</span>'
+              : ' <span class="ps-hint">· No current office columns</span>')
   );
   clearErr('emp-err');
   empReady = true;
@@ -686,9 +696,15 @@ function processDestRows(rows) {
   }
   newLocs = parsed;
   var hasCap = newLocs.some(function(r){ return r.capacity; });
-  document.getElementById('ta-dest').classList.add('has-data');
+  // Clear textarea immediately to free raw-text memory
+  var taDest = document.getElementById('ta-dest');
+  if (taDest) {
+    _clearedByParse['dest'] = true;
+    taDest.value = '';
+    taDest.classList.add('has-data');
+  }
   setPasteStatus('dest',
-    '<span class="ps-tag">✓ '+newLocs.length+' location'+(newLocs.length!==1?'s':'')+' detected</span>' +
+    '<span class="ps-tag">✓ '+newLocs.length.toLocaleString()+' location'+(newLocs.length!==1?'s':'')+' loaded</span>' +
     (hasCap ? ' <span class="ps-hint">· Capacity data found — utilization analysis enabled</span>' : '')
   );
   clearErr('dest-err');
