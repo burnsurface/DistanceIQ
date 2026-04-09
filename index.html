@@ -766,25 +766,38 @@ function processZipRows(rows, fromFile) {
     return;
   }
   var newRef = new Map();
+  var totalDataRows = rows.length - 1; // exclude header
   var loaded = 0;
+  var skipped = 0;
   for (var i = 1; i < rows.length; i++) {
     var row = rows[i];
-    var rawZip = String(row[zipCol]||'').trim().split('.')[0].replace(/\D/g,'');
-    if (!rawZip) continue;
+    // Force ZIP to string — handles both numeric (e.g. 1234) and string (e.g. "01234") formats
+    var rawZip = String(row[zipCol] === undefined || row[zipCol] === null ? '' : row[zipCol])
+                   .trim().split('.')[0].replace(/\D/g,'');
+    if (!rawZip) { skipped++; continue; }
+    // Pad to 5 digits so e.g. 347 → '00347', 1234 → '01234'
     var z5 = rawZip.substring(0,5).padStart(5,'0');
     var lat = parseFloat(row[latCol]);
     var lon = parseFloat(row[lonCol]);
-    if (!isNaN(lat) && !isNaN(lon)) { newRef.set(z5, {lat:lat, lon:lon}); loaded++; }
+    if (!isNaN(lat) && !isNaN(lon)) {
+      newRef.set(z5, {lat:lat, lon:lon});
+      loaded++;
+    } else {
+      skipped++;
+    }
   }
   if (!loaded) {
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">No valid ZIP rows found in zip_codes.csv</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">No valid ZIP rows found in zip_codes.csv — check that columns are: zip, latitude, longitude</span>';
     return;
   }
   zipRef = newRef;
   if (statusEl) {
+    var skipNote = skipped > 0 ? ' <span style="color:var(--muted);font-size:11px">· '+skipped.toLocaleString()+' rows skipped (missing lat/lon)</span>' : '';
     statusEl.innerHTML =
-      '<span style="background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.3);padding:2px 9px;border-radius:3px;font-size:11px">✓ '+loaded.toLocaleString()+' ZIP codes</span>' +
-      ' <span style="color:var(--muted);font-size:11px">· Loaded from zip_codes.csv — API calls skipped for all matched ZIPs</span>';
+      '<span style="background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.3);padding:2px 9px;border-radius:3px;font-size:11px">' +
+      '✅ Loaded '+loaded.toLocaleString()+' ZIP codes</span>' +
+      ' <span style="color:var(--muted);font-size:11px">· '+totalDataRows.toLocaleString()+' total rows in file · API calls bypassed</span>' +
+      skipNote;
   }
   clearErr('zip-err');
 }
