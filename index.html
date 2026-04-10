@@ -81,6 +81,15 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 .ps-hint{color:var(--muted);font-size:11px}
 .paste-tip{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:rgba(0,153,255,.06);border:1px solid rgba(0,153,255,.2);border-radius:6px;font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
 .paste-tip-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+/* CHUNK SYSTEM */
+.chunk-wrap{display:flex;flex-direction:column;gap:0}
+.chunk-item{display:flex;flex-direction:column;gap:0}
+.chunk-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;padding-left:2px}
+.btn-addchunk{font-family:var(--mono);font-size:12px;padding:10px 16px;border-radius:6px;border:1.5px dashed var(--border2);background:none;color:var(--accent2);cursor:pointer;transition:all .15s;width:100%;text-align:center;margin-top:10px;display:block}
+.btn-addchunk:hover{border-color:var(--accent2);background:rgba(0,153,255,.05);color:#fff}
+.emp-total-bar{margin-top:12px;padding:10px 16px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.25);border-radius:6px;font-family:var(--mono);font-size:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.emp-total-count{font-size:16px;font-weight:700;color:var(--accent)}
+.chunk-connector{width:2px;background:var(--border);height:10px;margin:0 auto}
 
 /* PREVIEW TABLE */
 .ptable-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:6px}
@@ -329,19 +338,97 @@ header{border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-i
 
     <div class="panel">
       <div class="ptitle">// Employee Data <span style="font-weight:300;color:var(--muted)">(Required)</span></div>
-      <p class="tmuted mt1" style="margin-bottom:14px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office — enables commute-change indicators in results.</p>
-      <div class="pzone">
-        <div class="pzone-hdr">
-          <span class="pzone-ico">👥</span>
-          <span class="pzone-title">Paste employee data from the Employee Template (include header row)</span>
-          <button class="pzone-clear" onclick="clearPasteZone('emp')">✕ Clear</button>
+      <p class="tmuted mt1" style="margin-bottom:14px">Each row = one employee. <strong style="color:var(--text)">Origin</strong> = home address. <strong style="color:var(--text)">Current Destination</strong> = current office. For large datasets, paste in batches of ~5,000–6,000 rows — after each paste a button appears to add the next chunk.</p>
+
+      <div class="chunk-wrap">
+
+        <!-- CHUNK 1 — always visible -->
+        <div class="chunk-item">
+          <div class="chunk-label">Chunk 1 — include header row</div>
+          <div class="pzone">
+            <div class="pzone-hdr">
+              <span class="pzone-ico">👥</span>
+              <span class="pzone-title">Paste first batch from the Employee Template</span>
+              <button class="pzone-clear" onclick="clearEmpChunk(0)">✕ Clear</button>
+            </div>
+            <textarea class="pzone-ta" id="ta-emp-0" spellcheck="false"
+              placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Unique Identifier · Origin Street · Origin City · Origin State · Origin Zip"
+              onpaste="onEmpChunkPaste(0)" oninput="onEmpChunkInput(0)"></textarea>
+            <div class="pzone-status" id="ps-emp-0"><span class="ps-hint">Waiting for data — paste from the Employee Template</span></div>
+          </div>
         </div>
-        <textarea class="pzone-ta" id="ta-emp" spellcheck="false"
-          placeholder="Paste here after copying from Excel...&#10;&#10;Expected columns: Unique Identifier · Origin Street · Origin City · Origin State · Origin Zip"
-          onpaste="onTaPaste('emp')" oninput="onTaInput('emp')"></textarea>
-        <div class="pzone-status" id="ps-emp"><span class="ps-hint">Waiting for data — paste from the Employee Template</span></div>
-      </div>
-      <div id="emp-preview"></div>
+
+        <!-- ADD CHUNK 2 button — revealed after chunk 1 succeeds -->
+        <div id="emp-addmore-0" style="display:none">
+          <button class="btn-addchunk" onclick="showEmpChunk(1)">+ Add Chunk 2 — paste next batch of rows</button>
+        </div>
+
+        <!-- CHUNK 2 — hidden until "Add Chunk 2" is clicked -->
+        <div class="chunk-item" id="emp-chunk-1" style="display:none">
+          <div class="chunk-connector"></div>
+          <div class="chunk-label">Chunk 2 — header row optional</div>
+          <div class="pzone">
+            <div class="pzone-hdr">
+              <span class="pzone-ico">👥</span>
+              <span class="pzone-title">Paste second batch</span>
+              <button class="pzone-clear" onclick="clearEmpChunk(1)">✕ Clear</button>
+            </div>
+            <textarea class="pzone-ta" id="ta-emp-1" spellcheck="false"
+              placeholder="Paste next batch of rows here (header row will be auto-detected and skipped if present)"
+              onpaste="onEmpChunkPaste(1)" oninput="onEmpChunkInput(1)"></textarea>
+            <div class="pzone-status" id="ps-emp-1"><span class="ps-hint">Waiting for Chunk 2 data</span></div>
+          </div>
+        </div>
+
+        <!-- ADD CHUNK 3 button — revealed after chunk 2 succeeds -->
+        <div id="emp-addmore-1" style="display:none">
+          <button class="btn-addchunk" onclick="showEmpChunk(2)">+ Add Chunk 3 — paste next batch of rows</button>
+        </div>
+
+        <!-- CHUNK 3 — hidden until "Add Chunk 3" is clicked -->
+        <div class="chunk-item" id="emp-chunk-2" style="display:none">
+          <div class="chunk-connector"></div>
+          <div class="chunk-label">Chunk 3 — header row optional</div>
+          <div class="pzone">
+            <div class="pzone-hdr">
+              <span class="pzone-ico">👥</span>
+              <span class="pzone-title">Paste third batch</span>
+              <button class="pzone-clear" onclick="clearEmpChunk(2)">✕ Clear</button>
+            </div>
+            <textarea class="pzone-ta" id="ta-emp-2" spellcheck="false"
+              placeholder="Paste next batch of rows here (header row will be auto-detected and skipped if present)"
+              onpaste="onEmpChunkPaste(2)" oninput="onEmpChunkInput(2)"></textarea>
+            <div class="pzone-status" id="ps-emp-2"><span class="ps-hint">Waiting for Chunk 3 data</span></div>
+          </div>
+        </div>
+
+        <!-- ADD CHUNK 4 button — revealed after chunk 3 succeeds -->
+        <div id="emp-addmore-2" style="display:none">
+          <button class="btn-addchunk" onclick="showEmpChunk(3)">+ Add Chunk 4 — paste next batch of rows</button>
+        </div>
+
+        <!-- CHUNK 4 -->
+        <div class="chunk-item" id="emp-chunk-3" style="display:none">
+          <div class="chunk-connector"></div>
+          <div class="chunk-label">Chunk 4 — header row optional</div>
+          <div class="pzone">
+            <div class="pzone-hdr">
+              <span class="pzone-ico">👥</span>
+              <span class="pzone-title">Paste fourth batch</span>
+              <button class="pzone-clear" onclick="clearEmpChunk(3)">✕ Clear</button>
+            </div>
+            <textarea class="pzone-ta" id="ta-emp-3" spellcheck="false"
+              placeholder="Paste next batch of rows here (header row will be auto-detected and skipped if present)"
+              onpaste="onEmpChunkPaste(3)" oninput="onEmpChunkInput(3)"></textarea>
+            <div class="pzone-status" id="ps-emp-3"><span class="ps-hint">Waiting for Chunk 4 data</span></div>
+          </div>
+        </div>
+
+      </div><!-- /chunk-wrap -->
+
+      <!-- Running total bar — shown once any chunk is loaded -->
+      <div class="emp-total-bar" id="emp-total" style="display:none"></div>
+
       <div id="emp-err" class="verr mt2"></div>
     </div>
 
@@ -587,7 +674,164 @@ function parseSection(type) {
 }
 
 // ─────────────────────────────────────────────
-// EMPLOYEE PASTE PROCESSING
+// EMPLOYEE CHUNK SYSTEM
+// ─────────────────────────────────────────────
+var empChunks   = [null, null, null, null]; // up to 4 chunks
+var empChunkMap = null;                     // column mapping locked in from chunk 0
+var _empChunkTimers  = {};
+var _empChunkCleared = {};
+var MAX_EMP_CHUNKS = 4;
+
+function onEmpChunkPaste(idx) {
+  clearTimeout(_empChunkTimers[idx]);
+  _empChunkTimers[idx] = setTimeout(function(){ parseEmpChunk(idx); }, 30);
+}
+
+function onEmpChunkInput(idx) {
+  clearTimeout(_empChunkTimers[idx]);
+  _empChunkTimers[idx] = setTimeout(function(){ parseEmpChunk(idx); }, 700);
+}
+
+function showEmpChunk(idx) {
+  var zone = document.getElementById('emp-chunk-'+idx);
+  if (zone) { zone.style.display = ''; }
+  var ta = document.getElementById('ta-emp-'+idx);
+  if (ta) { setTimeout(function(){ ta.focus(); }, 50); }
+}
+
+function clearEmpChunk(idx) {
+  _empChunkCleared[idx] = false;
+  var ta = document.getElementById('ta-emp-'+idx);
+  if (ta) { ta.value = ''; ta.classList.remove('has-data'); }
+  var ps = document.getElementById('ps-emp-'+idx);
+  if (ps) ps.innerHTML = '<span class="ps-hint">'+(idx===0 ? 'Waiting for data — paste from the Employee Template' : 'Waiting for Chunk '+(idx+1)+' data')+'</span>';
+  empChunks[idx] = null;
+  if (idx === 0) { empChunkMap = null; }
+  // Hide downstream chunks and add-more buttons when chunk 0 is cleared
+  if (idx === 0) {
+    for (var i = 1; i < MAX_EMP_CHUNKS; i++) {
+      var am = document.getElementById('emp-addmore-'+(i-1));
+      if (am) am.style.display = 'none';
+      var ck = document.getElementById('emp-chunk-'+i);
+      if (ck) ck.style.display = 'none';
+      empChunks[i] = null;
+      var taI = document.getElementById('ta-emp-'+i);
+      if (taI) { taI.value = ''; taI.classList.remove('has-data'); }
+      var psI = document.getElementById('ps-emp-'+i);
+      if (psI) psI.innerHTML = '<span class="ps-hint">Waiting for Chunk '+(i+1)+' data</span>';
+    }
+    empChunkMap = null;
+  }
+  recomputeEmpData();
+}
+
+function parseEmpChunk(idx) {
+  var ta = document.getElementById('ta-emp-'+idx);
+  if (!ta) return;
+  if (_empChunkCleared[idx]) { _empChunkCleared[idx] = false; return; }
+  var text = ta.value.trim();
+  if (!text) { clearEmpChunk(idx); return; }
+  var rows = parseTsv(text);
+  processEmpChunk(rows, idx);
+}
+
+function processEmpChunk(rows, idx) {
+  var statusEl = document.getElementById('ps-emp-'+idx);
+  function chunkErr(msg) { if (statusEl) statusEl.innerHTML = '<span class="ps-err">'+msg+'</span>'; }
+
+  var cm, data;
+
+  if (idx === 0 || !empChunkMap) {
+    // First chunk — must have a header row
+    if (rows.length < 2) { chunkErr('No data rows found — make sure to include the header row.'); return; }
+    var hdrs = rows[0].map(function(h){ return String(h||'').trim(); });
+    data = rows.slice(1).filter(function(r){ return r.some(function(c){ return c.trim() !== ''; }); });
+    cm = {
+      id:     fc(hdrs,['unique identifier','id','identifier','employee id']),
+      oSt:    fc(hdrs,['origin street','home street']),
+      oCity:  fc(hdrs,['origin city','home city']),
+      oState: fc(hdrs,['origin state','home state']),
+      oZip:   fc(hdrs,['origin zip','home zip']),
+      dSt:    fc(hdrs,['current destination street','dest street','destination street','office street']),
+      dCity:  fc(hdrs,['current destination city','dest city','destination city','office city']),
+      dState: fc(hdrs,['current destination state','dest state','destination state','office state']),
+      dZip:   fc(hdrs,['current destination zip','dest zip','destination zip','office zip'])
+    };
+    if (cm.id === -1 || cm.oSt === -1) {
+      chunkErr('Could not find required columns (Unique Identifier, Origin Street). Make sure Chunk 1 includes the header row from the Employee Template.');
+      return;
+    }
+    empChunkMap = cm;
+  } else {
+    // Subsequent chunks — auto-detect and skip header if present
+    cm = empChunkMap;
+    var firstJoined = rows[0].slice(0, 6).join('').toLowerCase();
+    var hasHeader = firstJoined.includes('unique') || firstJoined.includes('identifier') ||
+                    firstJoined.includes('origin') || firstJoined.includes('employee');
+    data = (hasHeader ? rows.slice(1) : rows).filter(function(r){
+      return r.some(function(c){ return c.trim() !== ''; });
+    });
+  }
+
+  var parsed = data.map(function(r){
+    return {
+      id:      s(r[cm.id]),
+      oStreet: s(r[cm.oSt]),
+      oCity:   cm.oCity  > -1 ? s(r[cm.oCity])  : '',
+      oState:  cm.oState > -1 ? s(r[cm.oState]) : '',
+      oZip:    cm.oZip   > -1 ? s(r[cm.oZip])   : '',
+      dStreet: cm.dSt    > -1 ? s(r[cm.dSt])    : '',
+      dCity:   cm.dCity  > -1 ? s(r[cm.dCity])  : '',
+      dState:  cm.dState > -1 ? s(r[cm.dState]) : '',
+      dZip:    cm.dZip   > -1 ? s(r[cm.dZip])   : ''
+    };
+  }).filter(function(r){ return r.id && r.oStreet; });
+
+  if (!parsed.length) { chunkErr('No valid rows found in this chunk — check that ID and Origin Street columns have data.'); return; }
+
+  empChunks[idx] = parsed;
+
+  // Immediately free raw text memory
+  var ta = document.getElementById('ta-emp-'+idx);
+  if (ta) { _empChunkCleared[idx] = true; ta.value = ''; ta.classList.add('has-data'); }
+
+  if (statusEl) statusEl.innerHTML = '<span class="ps-tag">✓ '+parsed.length.toLocaleString()+' rows in Chunk '+(idx+1)+'</span>';
+  clearErr('emp-err');
+
+  // Reveal "Add more" button for the next slot (if not on last chunk)
+  if (idx < MAX_EMP_CHUNKS - 1) {
+    var addBtn = document.getElementById('emp-addmore-'+idx);
+    if (addBtn) addBtn.style.display = '';
+  }
+
+  recomputeEmpData();
+}
+
+function recomputeEmpData() {
+  var loaded = empChunks.filter(Boolean);
+  if (!loaded.length) {
+    empData = []; empReady = false;
+    var tot = document.getElementById('emp-total');
+    if (tot) tot.style.display = 'none';
+    checkReady(); return;
+  }
+  empData = Array.prototype.concat.apply([], loaded);
+  empReady = true;
+  var hasDest = empData.some(function(r){ return r.dStreet; });
+  var summary = loaded.map(function(c,i){ return 'Chunk '+(i+1)+': '+c.length.toLocaleString(); }).join(' &nbsp;·&nbsp; ');
+  var tot = document.getElementById('emp-total');
+  if (tot) {
+    tot.style.display = '';
+    tot.innerHTML =
+      '<span class="emp-total-count">✅ '+empData.length.toLocaleString()+' employees</span>' +
+      '<span style="color:var(--muted)">'+summary+'</span>' +
+      (hasDest ? '<span style="color:var(--muted)">· change indicators enabled</span>' : '');
+  }
+  checkReady();
+}
+
+// ─────────────────────────────────────────────
+// EMPLOYEE PASTE PROCESSING (legacy — kept for reference)
 // ─────────────────────────────────────────────
 function processEmpRows(rows) {
   if (rows.length < 2) {
@@ -1726,14 +1970,20 @@ function exportWord() {
 function resetAll() {
   empData=[]; newLocs=[]; zipRef=new Map(); resultsData=null;
   empReady=false; locReady=false;
-  ['emp-preview','dest-preview'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.innerHTML='';
-  });
+  empChunks=[null,null,null,null]; empChunkMap=null;
+
+  // Reset all emp chunks
+  clearEmpChunk(0); // also resets chunks 1-3 and hides add-more buttons
+
+  // Reset dest
+  clearPasteZone('dest');
+
   ['emp-err','zip-err','dest-err'].forEach(function(id){ clearErr(id); });
   document.getElementById('btn-calc').disabled = true;
-  ['emp','dest'].forEach(function(type){ clearPasteZone(type); });
+
   var zas = document.getElementById('zip-autoload-status');
   if (zas) zas.innerHTML = 'Checking for zip_codes.csv…';
+
   [1,2,3].forEach(function(n){
     document.getElementById('tab-'+n).classList.remove('done');
     document.getElementById('snum-'+n).textContent = n;
